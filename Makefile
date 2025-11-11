@@ -96,7 +96,9 @@ test:  ##
 lint: $(GOLANGCI_LINT) ## 
 	$(GOLANGCI_LINT) --version
 	@for gomod in $(GOMODS); do \
-		$(GOLANGCI_LINT) run -v --config ./.golangci.yaml $$gomod/... ; \
+		(cd $$gomod && \
+			echo $(PWD) && \
+			$(GOLANGCI_LINT) run -v --config ../.golangci.yaml ./...) ; \
 	done
 
 $(GOLANGCI_LINT):
