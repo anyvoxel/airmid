@@ -24,9 +24,9 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/app/reader"
 	"github.com/anyvoxel/airmid/ioc/props"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // Config holds the config resources.
@@ -44,7 +44,7 @@ func (*config) NewConfig() (*config, error) {
 func (c *config) loadProperty(p props.Properties) error {
 	resources := []Resource{}
 
-	logger.FromContext(context.TODO()).DebugContext(
+	slogctx.FromCtx(context.TODO()).DebugContext(
 		context.TODO(),
 		"Configuration file extensions supported",
 		slog.Any("ConfigExtensions", c.ConfigExtensions),
@@ -59,7 +59,7 @@ func (c *config) loadProperty(p props.Properties) error {
 		resources = append(resources, ress...)
 	}
 
-	logger.FromContext(context.TODO()).DebugContext(
+	slogctx.FromCtx(context.TODO()).DebugContext(
 		context.TODO(),
 		"Configuration file active profiles supported",
 		slog.Any("ActiveProfiles", c.ActiveProfiles),
@@ -77,7 +77,7 @@ func (c *config) loadProperty(p props.Properties) error {
 	}
 
 	for _, res := range resources {
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"Loading configuration properties",
 			slog.String("FileName", res.Name()),

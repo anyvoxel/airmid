@@ -29,9 +29,9 @@ import (
 	"strings"
 
 	"github.com/anyvoxel/airmid/anvil/conv"
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/anvil/xreflect"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // NewProperties return the Properties impl.
@@ -187,7 +187,7 @@ func (p propertiesImpl) Set(key string, val any) error {
 			return xerrors.Wrapf(err, "Cannot convert value for key '%s' to string", key)
 		}
 		p[key] = value
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"set property success",
 			slog.String("Key", key),

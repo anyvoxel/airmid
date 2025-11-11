@@ -6,6 +6,7 @@ require (
 	github.com/anyvoxel/airmid/anvil v0.0.0-20251110024612-4694a8aee8b4
 	github.com/anyvoxel/airmid/app v0.0.0-20251110024612-4694a8aee8b4
 	github.com/anyvoxel/airmid/ioc v0.0.0-20251110024612-4694a8aee8b4
+	github.com/veqryn/slog-context v0.8.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.28.0
 	go.opentelemetry.io/otel/sdk v1.38.0
@@ -13,6 +14,7 @@ require (
 )
 
 require (
+	github.com/anyvoxel/airmid/xapp v0.0.0-20251108123417-30b7b511b150 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -25,10 +27,4 @@ require (
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-)
-
-replace (
-// github.com/anyvoxel/airmid/anvil => ../anvil
-// github.com/anyvoxel/airmid/app => ../app
-// github.com/anyvoxel/airmid/ioc => ../ioc
 )

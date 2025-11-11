@@ -25,11 +25,11 @@ import (
 	"time"
 
 	"github.com/panjf2000/ants/v2"
+	slogctx "github.com/veqryn/slog-context"
 	"go.opentelemetry.io/otel"
 	api "go.opentelemetry.io/otel/metric"
 
 	"github.com/anyvoxel/airmid/anvil"
-	"github.com/anyvoxel/airmid/anvil/logger"
 )
 
 // GPoolFactory will build the gpool.
@@ -78,7 +78,7 @@ func (f *GPoolFactory) CreatePool() (*ants.Pool, error) {
 
 // Printf implement ants.Logger.
 func (*GPoolFactory) Printf(format string, args ...any) {
-	logger.FromContext(context.TODO()).InfoContext(
+	slogctx.FromCtx(context.TODO()).InfoContext(
 		context.TODO(),
 		fmt.Sprintf(format, args...),
 	)

@@ -10,6 +10,7 @@ require (
 	github.com/anyvoxel/airmid/ioc v0.0.0-00010101000000-000000000000
 	github.com/onsi/gomega v1.38.2
 	github.com/panjf2000/ants/v2 v2.11.3
+	github.com/veqryn/slog-context v0.8.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/metric v1.38.0
 	go.opentelemetry.io/otel/sdk/metric v1.38.0

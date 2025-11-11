@@ -28,7 +28,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
+	slogctx "github.com/veqryn/slog-context"
+
 	"github.com/anyvoxel/airmid/anvil/parallel"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/ioc/props"
@@ -157,7 +158,7 @@ func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
 	}
 
 	if vobj := IndirectTo[InitializingBean](obj); vobj != nil {
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"bean impelemented the InitializingBean interface, will execute it",
 			slog.String("BeanName", name),
@@ -168,7 +169,7 @@ func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
 			return nil, err
 		}
 	} else {
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"bean doesn't impelemented the InitializingBean interface, will skip it",
 			slog.String("BeanName", name),
@@ -401,7 +402,7 @@ func (f *beanFactoryImpl) RegisterScope(name string, scope Scope) error {
 
 	pre, ok := f.scopes[name]
 	if ok && pre != scope {
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"Old scope is exists, replicing it when new scope is register",
 			slog.String("ScopeName", name),
@@ -446,14 +447,14 @@ func (f *beanFactoryImpl) PreInstantiateSingletons() error {
 
 	for name, obj := range f.singletonObjects {
 		if smartSingleton := IndirectTo[SmartInitializingSingleton](obj.Interface()); smartSingleton != nil {
-			logger.FromContext(context.TODO()).DebugContext(
+			slogctx.FromCtx(context.TODO()).DebugContext(
 				context.TODO(),
 				"singleton bean has implements SmartInitializingSingleton, will execute it",
 				slog.String("BeanName", name),
 			)
 
 			if err := smartSingleton.AfterSingletonsInstantiated(); err != nil {
-				logger.FromContext(context.TODO()).ErrorContext(
+				slogctx.FromCtx(context.TODO()).ErrorContext(
 					context.TODO(),
 					"Smart instantiate singleton bean failed",
 					slog.String("BeanName", name),
@@ -462,7 +463,7 @@ func (f *beanFactoryImpl) PreInstantiateSingletons() error {
 				return err
 			}
 		} else {
-			logger.FromContext(context.TODO()).DebugContext(
+			slogctx.FromCtx(context.TODO()).DebugContext(
 				context.TODO(),
 				"singleton bean has not implements SmartInitializingSingleton, will skip it",
 				slog.String("BeanName", name),
@@ -480,7 +481,7 @@ func (f *beanFactoryImpl) doConcurrentInstantiateSingleton(beanNames []string) e
 	return parallel.Run(context.TODO(), len(beanNames), func(idx int) error {
 		_, err := f.GetBean(beanNames[idx])
 		if err != nil {
-			logger.FromContext(context.TODO()).ErrorContext(
+			slogctx.FromCtx(context.TODO()).ErrorContext(
 				context.TODO(),
 				"instantiate singleton bean failed",
 				slog.String("BeanName", beanNames[idx]),
@@ -489,7 +490,7 @@ func (f *beanFactoryImpl) doConcurrentInstantiateSingleton(beanNames []string) e
 			return err
 		}
 
-		logger.FromContext(context.TODO()).InfoContext(
+		slogctx.FromCtx(context.TODO()).InfoContext(
 			context.TODO(),
 			"instantiate singleton bean",
 			slog.String("BeanName", beanNames[idx]),

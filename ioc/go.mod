@@ -5,10 +5,12 @@ go 1.25.3
 require (
 	github.com/anyvoxel/airmid/anvil v0.0.0-20251108014035-3e6b93476dfc
 	github.com/onsi/gomega v1.38.2
+	github.com/veqryn/slog-context v0.8.0
 	go.uber.org/mock v0.6.0
 )
 
 require (
+	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

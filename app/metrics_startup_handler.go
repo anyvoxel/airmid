@@ -31,8 +31,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 
 	"github.com/anyvoxel/airmid/anvil"
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/ioc"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 type metricsStartupHandlerConfiguration struct {
@@ -116,7 +116,7 @@ func (m *metricsStartupHandler) BeforeStartRunner(ctx context.Context, _ *airmid
 		api.WithDescription("Start time of the service in unix timestamp"),
 	)
 	if err != nil {
-		logger.FromContext(ctx).ErrorContext(
+		slogctx.FromCtx(ctx).ErrorContext(
 			ctx, "Cann't initialize start_time_seconds metrics",
 			slog.Any("Error", err),
 		)

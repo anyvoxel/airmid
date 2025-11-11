@@ -13,8 +13,8 @@ import (
 	_ "github.com/anyvoxel/airmid/examples/runner2"
 	_ "github.com/anyvoxel/airmid/examples/runner3"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/app"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // CurrentProjectPath get the project root path
@@ -86,7 +86,7 @@ func main() {
 		},
 	))
 	if err != nil {
-		logger.FromContext(context.TODO()).ErrorContext(context.Background(), "Run application failed", slog.Any("Error", err))
+		slogctx.FromCtx(context.TODO()).ErrorContext(context.Background(), "Run application failed", slog.Any("Error", err))
 		panic(err)
 	}
 }

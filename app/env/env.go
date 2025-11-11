@@ -27,7 +27,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // Loader is a loader for loading environment variables.
@@ -122,7 +122,7 @@ func (l *envLoader) Load() map[string]string {
 		l.envs[key] = kvArr[1]
 	}
 
-	logger.FromContext(context.TODO()).DebugContext(
+	slogctx.FromCtx(context.TODO()).DebugContext(
 		context.TODO(),
 		"loading airmid environments variables",
 		slog.String("Prefix", l.prefix),

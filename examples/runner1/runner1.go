@@ -7,9 +7,9 @@ import (
 	"reflect"
 
 	"github.com/anyvoxel/airmid/anvil"
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/app"
 	"github.com/anyvoxel/airmid/ioc"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 type runner1 struct {
@@ -41,7 +41,7 @@ func (r *runner1) SetBeanFactory(beanFactory ioc.BeanFactory) {
 }
 
 func (r *runner1) Run(ctx context.Context) {
-	logger.FromContext(ctx).InfoContext(ctx, fmt.Sprintf("Runner1.Run called: attr='%v'\n", r.Attr))
+	slogctx.FromCtx(ctx).InfoContext(ctx, fmt.Sprintf("Runner1.Run called: attr='%v'\n", r.Attr))
 
 	r.publisher.PublishEvent(context.WithValue(ctx, k1, "v1"), &runner1RunEvent{
 		ApplicationEvent: app.NewDefaultApplicationEvent(r),
@@ -49,16 +49,16 @@ func (r *runner1) Run(ctx context.Context) {
 	})
 
 	attr, _ := r.application.Get("attr")
-	logger.FromContext(ctx).InfoContext(ctx, fmt.Sprintf("Runner1 get properties: %s=%v", "attr", attr))
+	slogctx.FromCtx(ctx).InfoContext(ctx, fmt.Sprintf("Runner1 get properties: %s=%v", "attr", attr))
 
 	r.application.Submit(func() {
-		logger.FromContext(ctx).InfoContext(ctx, "submit running in gpool")
+		slogctx.FromCtx(ctx).InfoContext(ctx, "submit running in gpool")
 	})
 }
 
 // todo(xiangqilin): stop publish event.
 func (r *runner1) Stop(ctx context.Context) {
-	logger.FromContext(ctx).InfoContext(ctx, "Runner1.Stop called: runner is stopping")
+	slogctx.FromCtx(ctx).InfoContext(ctx, "Runner1.Stop called: runner is stopping")
 }
 
 type eventListener struct {
@@ -68,7 +68,7 @@ type eventListener struct {
 //
 //	pre initialize all singleton & non-lazy-mode instance.
 func (l *eventListener) OnRunEvent(ctx context.Context, event *runner1RunEvent) {
-	logger.FromContext(ctx).InfoContext(ctx, "OnRunEvent", slog.Any("k1", ctx.Value(k1)), slog.Any("event", event.desp))
+	slogctx.FromCtx(ctx).InfoContext(ctx, "OnRunEvent", slog.Any("k1", ctx.Value(k1)), slog.Any("event", event.desp))
 }
 
 func init() {
