@@ -86,14 +86,19 @@ test:  ##
 	# 	NOTE: this was fixed by 1.20 release
 	# 2. add -ldflags to prevent 'permission denied' in macos, see https://github.com/agiledragon/gomonkey/issues/70 for more detail.
 	@for gomod in $(GOMODS); do \
-	    $(MAKE) -C $$gomod test || exit 1 ; \
+	    (cd $$gomod && \
+			go test -v -race -ldflags="-extldflags="-Wl,-segprot,__TEXT,rwx,rx"" -coverpkg=./... -coverprofile=coverage.out -gcflags="all=-N -l" ./... && \
+			go tool cover -func coverage.out | tail -n 1 | awk '{ print "Total coverage: " $$3 }'); \
 	done
 
 
 .PHONY: lint
 lint: $(GOLANGCI_LINT) ## 
+	$(GOLANGCI_LINT) --version
 	@for gomod in $(GOMODS); do \
-	    $(MAKE) -C $$gomod lint || exit 1 ; \
+		(cd $$gomod && \
+			echo $(PWD) && \
+			$(GOLANGCI_LINT) run -v --config ../.golangci.yaml ./...) ; \
 	done
 
 $(GOLANGCI_LINT):
@@ -104,22 +109,22 @@ $(GOLANGCI_LINT):
 clean:  ##
 	@find . -name "coverage.out*" -exec rm -vrf {} \;
 	@for gomod in $(GOMODS); do \
-	    $(MAKE) -C $$gomod clean || exit 1 ; \
+	    (cd $$gomod && rm -vrf ${OUTPUT_DIR} output coverage.out); \
 	done
 
 
 MOCKGEN := $(BIN_DIR)/mockgen
 .PHONY: mock
 mock: $(MOCKGEN)  ## 
-	@for gomod in $(GOMODS); do \
-	    $(MAKE) -C $$gomod mock || exit 1 ; \
-	done
+	mockgen -source=ioc/props/types.go -destination=ioc/props/mocks/types.go -package=mocks
+	mockgen -source=app/xapp.go -destination=app/xapp_mocks_test.go -package=app
+	mockgen -source=app/locator.go -destination=app/locator_mocks_test.go -package=app
 
 $(MOCKGEN):
 	go install go.uber.org/mock/mockgen@latest
 
 
-addheaders:
+addheaders: ## add license header to files
 	@command -v addlicense > /dev/null || go install -v github.com/google/addlicense@v0.0.0-20210428195630-6d92264d7170
 	@addlicense -c "The anyvoxel Authors" -l mit .
 

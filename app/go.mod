@@ -8,7 +8,6 @@ require (
 	github.com/agiledragon/gomonkey/v2 v2.13.0
 	github.com/anyvoxel/airmid/anvil v0.0.0-20251108123417-30b7b511b150
 	github.com/anyvoxel/airmid/ioc v0.0.0-00010101000000-000000000000
-	github.com/anyvoxel/airmid/xapp v0.0.0-20251108123417-30b7b511b150
 	github.com/onsi/gomega v1.38.2
 	github.com/panjf2000/ants/v2 v2.11.3
 	go.opentelemetry.io/otel v1.38.0

@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/anyvoxel/airmid/app/env"
 	"github.com/anyvoxel/airmid/ioc/props"
-	"github.com/anyvoxel/airmid/xapp/env"
 )
 
 // PropertiesLoader is a loader for loading properties.
