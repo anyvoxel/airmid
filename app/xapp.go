@@ -27,10 +27,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/ioc"
 	"github.com/anyvoxel/airmid/ioc/props"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // Application is the interface for app.
@@ -237,7 +237,7 @@ func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error)
 	a.props.runnerCompositor.appRunnerNames = appRunnerCompoistorProcessor.appRunnerNames
 	a.props.runnerCompositor.Run(ctx)
 
-	logger.FromContext(ctx).InfoContext(
+	slogctx.FromCtx(ctx).InfoContext(
 		ctx,
 		"all AppRunner started, wait for exit signal",
 	)
@@ -267,7 +267,7 @@ func (a *airmidApplication) Shutdown() {
 func (a *airmidApplication) shutdownWithMessage(msg string) {
 	a.Destroy()
 
-	logger.FromContext(context.TODO()).InfoContext(
+	slogctx.FromCtx(context.TODO()).InfoContext(
 		context.TODO(),
 		fmt.Sprintf("Application will shutdown within: %s", msg),
 		slog.Any("ShutdownDuration", a.props.shutdownDuration),
@@ -278,13 +278,13 @@ func (a *airmidApplication) shutdownWithMessage(msg string) {
 
 	err := a.props.runnerCompositor.Stop(ctx)
 	if xerrors.Is(err, context.DeadlineExceeded) {
-		logger.FromContext(context.TODO()).InfoContext(
+		slogctx.FromCtx(context.TODO()).InfoContext(
 			context.TODO(),
 			"Application shutdown duration was too long, force close...",
 			slog.Any("ShutdownDuration", a.props.shutdownDuration),
 		)
 	} else {
-		logger.FromContext(context.TODO()).InfoContext(
+		slogctx.FromCtx(context.TODO()).InfoContext(
 			context.TODO(),
 			"All runners were stopped, application gracefully shutdown",
 		)

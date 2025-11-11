@@ -24,7 +24,8 @@ import (
 	"log/slog"
 	"reflect"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
+	slogctx "github.com/veqryn/slog-context"
+
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/ioc"
 )
@@ -59,7 +60,7 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(obj any, be
 		invoker, err := NewFnListenerInvoker(fn, m.Name, l.app)
 		if err != nil {
 			if xerrors.IsContinue(err) {
-				logger.FromContext(context.TODO()).DebugContext(
+				slogctx.FromCtx(context.TODO()).DebugContext(
 					context.TODO(),
 					"bean method doesn't implement the listener, skip it",
 					slog.String("BeanName", beanName),
@@ -81,7 +82,7 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(obj any, be
 			return nil, err
 		}
 
-		logger.FromContext(context.TODO()).DebugContext(
+		slogctx.FromCtx(context.TODO()).DebugContext(
 			context.TODO(),
 			"bean doesn't implement the listener, skip it",
 			slog.String("BeanName", beanName),

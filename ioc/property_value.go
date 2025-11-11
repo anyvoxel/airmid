@@ -25,7 +25,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/anyvoxel/airmid/anvil/logger"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // PropertyValues is the values holder for bean property.
@@ -56,7 +56,7 @@ func (p *propertyValuesImpl) SetProperty(obj reflect.Value, fieldDescriptors []F
 	for _, fd := range fieldDescriptors {
 		value, ok := p.values[fd.FieldIndex]
 		if !ok {
-			logger.FromContext(context.TODO()).DebugContext(
+			slogctx.FromCtx(context.TODO()).DebugContext(
 				context.TODO(),
 				"the value of field not found, skip it",
 				slog.Int("FieldIndex", fd.FieldIndex),
