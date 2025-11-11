@@ -31,7 +31,7 @@ import (
 )
 
 // NOTE: how can we compare the benchmark:
-// 1. `go test -benchmem -run=^$ -bench ^Benchmark_Global_Meter$ github.com/anyvoxel/airmid/xapp  -count=10 | tee meter.txt`
+// 1. `go test -benchmem -run=^$ -bench ^Benchmark_Global_Meter$ github.com/anyvoxel/airmid/app  -count=10 | tee meter.txt`
 // 2. run the command for Benchmark_Global_Meter_Once, output to meter_once.txt
 // 3. modify the meter_once.txt, change `Benchmark_Global_Meter_Once` to `Benchmark_Global_Meter`
 //    3.1 NOTE: use this to ensure output's function have same name

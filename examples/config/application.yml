@@ -1,0 +1,10 @@
+attr: attr1
+attr2: 1
+port: 8080
+address: 127.0.0.1
+name: interfaceconfig
+timeout: 1s
+airmid:
+  shutdown:
+    duration: 15s
+test: test-self-defination
