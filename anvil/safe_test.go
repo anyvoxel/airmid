@@ -20,6 +20,7 @@
 package anvil
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -30,22 +31,22 @@ import (
 func TestSafeRun(t *testing.T) {
 	type testCase struct {
 		desp string
-		cmd  func()
+		cmd  func(context.Context)
 	}
 	testCases := []testCase{
 		{
 			desp: "normal runnable",
-			cmd:  func() {},
+			cmd:  func(context.Context) {},
 		},
 		{
 			desp: "panic on error",
-			cmd: func() {
+			cmd: func(context.Context) {
 				panic(xerrors.ErrNotFound)
 			},
 		},
 		{
 			desp: "panic on int",
-			cmd: func() {
+			cmd: func(context.Context) {
 				panic(1)
 			},
 		},
@@ -55,7 +56,7 @@ func TestSafeRun(t *testing.T) {
 			g := NewWithT(t)
 
 			g.Ω(func() {
-				SafeRun(tc.cmd)
+				SafeRun(context.Background(), tc.cmd)
 			}).ToNot(Panic())
 		})
 	}

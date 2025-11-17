@@ -24,11 +24,13 @@ import (
 	"log/slog"
 	"runtime/debug"
 
+	slogctx "github.com/veqryn/slog-context"
+
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
 // SafeRun will execute cmd and recover any panic.
-func SafeRun(cmd func()) {
+func SafeRun(ctx context.Context, cmd func(context.Context)) {
 	defer func() {
 		if r := recover(); r != nil {
 			var err error
@@ -38,12 +40,12 @@ func SafeRun(cmd func()) {
 				err = xerrors.Errorf("Recover from: '%v', stack: '%v'", r, string(debug.Stack()))
 			}
 
-			slog.ErrorContext(
-				context.TODO(), "Panic when execute runnable",
+			slogctx.FromCtx(ctx).ErrorContext(
+				ctx, "Panic when execute runnable",
 				slog.Any("Error", err),
 			)
 		}
 	}()
 
-	cmd()
+	cmd(ctx)
 }
