@@ -20,6 +20,7 @@
 package app
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -84,7 +85,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 			p := &ApplicationAwareProcessor{
 				app: app,
 			}
-			_, err := p.PostProcessBeforeInitialization(tc.obj, tc.name)
+			_, err := p.PostProcessBeforeInitialization(context.Background(), tc.obj, tc.name)
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(tc.obj).To(Equal(tc.expect))
 		})

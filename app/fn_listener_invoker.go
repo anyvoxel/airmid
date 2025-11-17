@@ -61,7 +61,7 @@ func (i *fnListenerInvoker) Invoke(ctx context.Context, event ApplicationEvent) 
 
 		anvil.Must(i.app.Submit(func() {
 			//nolint:contextcheck
-			anvil.SafeRun(func() {
+			anvil.SafeRun(ctx, func(ctx context.Context) {
 				i.fn.Call([]reflect.Value{
 					reflect.ValueOf(ctx),
 					in1,

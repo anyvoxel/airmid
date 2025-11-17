@@ -20,6 +20,7 @@
 package env
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -96,7 +97,7 @@ func TestLoaderImpl_Load(t *testing.T) {
 				c.testBefore()
 			}
 			loader := c.newLoader()
-			actual := loader.Load()
+			actual := loader.Load(context.Background())
 			g.Expect(actual).Should(gomega.Equal(c.expected))
 			if c.testAfter != nil {
 				c.testAfter()

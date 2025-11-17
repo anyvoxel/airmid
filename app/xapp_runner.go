@@ -43,7 +43,8 @@ type RunnerCompoistorProcessor struct {
 }
 
 // PostProcessBeforeInitialization implement the BeanPostProcessor.PostProcessBeforeInitialization.
-func (p *RunnerCompoistorProcessor) PostProcessBeforeInitialization(obj any, beanName string) (v any, err error) {
+func (p *RunnerCompoistorProcessor) PostProcessBeforeInitialization(
+	_ context.Context, obj any, beanName string) (v any, err error) {
 	if vobj := ioc.IndirectTo[Runner](obj); vobj != nil {
 		// NOTE: we cannot return a WrapObject for AppRunner, because
 		// when we use embedded interface, the WrapObject didn't implement
@@ -55,7 +56,8 @@ func (p *RunnerCompoistorProcessor) PostProcessBeforeInitialization(obj any, bea
 }
 
 // PostProcessAfterInitialization implement the BeanPostProcessor.PostProcessAfterInitialization.
-func (*RunnerCompoistorProcessor) PostProcessAfterInitialization(obj any, _ string) (v any, err error) {
+func (*RunnerCompoistorProcessor) PostProcessAfterInitialization(
+	_ context.Context, obj any, _ string) (v any, err error) {
 	return obj, nil
 }
 

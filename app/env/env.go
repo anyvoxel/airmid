@@ -32,7 +32,7 @@ import (
 
 // Loader is a loader for loading environment variables.
 type Loader interface {
-	Load() map[string]string
+	Load(context.Context) map[string]string
 }
 
 // loaderImpl is the implementation of Loader.
@@ -99,7 +99,7 @@ func WithEnvIncludePattern(includePattern string) EnvLoaderOption {
 	}
 }
 
-func (l *envLoader) Load() map[string]string {
+func (l *envLoader) Load(ctx context.Context) map[string]string {
 	envStrs := os.Environ()
 	for _, envStr := range envStrs {
 		kvArr := strings.SplitN(envStr, "=", 2)
@@ -122,8 +122,8 @@ func (l *envLoader) Load() map[string]string {
 		l.envs[key] = kvArr[1]
 	}
 
-	slogctx.FromCtx(context.TODO()).DebugContext(
-		context.TODO(),
+	slogctx.FromCtx(ctx).DebugContext(
+		ctx,
 		"loading airmid environments variables",
 		slog.String("Prefix", l.prefix),
 		slog.Any("envs", l.envs),

@@ -2,12 +2,10 @@ module github.com/anyvoxel/airmid/app
 
 go 1.25.3
 
-replace github.com/anyvoxel/airmid/ioc => ../ioc
-
 require (
 	github.com/agiledragon/gomonkey/v2 v2.13.0
-	github.com/anyvoxel/airmid/anvil v0.1.0
-	github.com/anyvoxel/airmid/ioc v0.1.0
+	github.com/anyvoxel/airmid/anvil v0.1.2
+	github.com/anyvoxel/airmid/ioc v0.1.2
 	github.com/onsi/gomega v1.38.2
 	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/veqryn/slog-context v0.8.0

@@ -39,13 +39,13 @@ func RegisterBeanDefinition(beanName string, beanDefinition ioc.BeanDefinition) 
 }
 
 // Set wraps beans.BeanFactory.Set function.
-func Set(key string, value any) error {
-	return app.Set(key, value)
+func Set(ctx context.Context, key string, value any) error {
+	return app.Set(ctx, key, value)
 }
 
 // Get wraps beans.BeanFactory.Get function.
-func Get(key string, opts ...props.GetOption) (any, error) {
-	return app.Get(key, opts...)
+func Get(ctx context.Context, key string, opts ...props.GetOption) (any, error) {
+	return app.Get(ctx, key, opts...)
 }
 
 // Run wraps Application.Run function.

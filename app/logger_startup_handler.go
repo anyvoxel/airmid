@@ -54,7 +54,7 @@ func (*loggerStartupHandler) Name() string {
 
 func (*loggerStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
 	return app.RegisterBeanDefinition(
-		"airmidLoggerStartupHandlerConfiguraion",
+		"airmid.logger.startup.config",
 		ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*loggerStartupHandlerConfiguration)(nil)),
 			ioc.WithLazyMode(),
@@ -64,7 +64,7 @@ func (*loggerStartupHandler) BeforeLoadProps(_ context.Context, app *airmidAppli
 
 // AfterLoadProps change the default logger to the bean which implement it.
 func (*loggerStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApplication, _ *option) error {
-	loggerC, err := ioc.GetBean[*loggerStartupHandlerConfiguration](app, "airmidLoggerStartupHandlerConfiguraion")
+	loggerC, err := ioc.GetBean[*loggerStartupHandlerConfiguration](ctx, app, "airmid.logger.startup.config")
 	if err != nil {
 		return err
 	}

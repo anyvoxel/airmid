@@ -103,19 +103,19 @@ func NewApplication() Application {
 
 func (a *airmidApplication) registerAppBeanDefinitions() error {
 	beanDefinitions := map[string]ioc.BeanDefinition{
-		"airmidAppConfig": ioc.MustNewBeanDefinition(
+		"airmid.app.config": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*config)(nil)),
 			ioc.WithLazyMode(),
 		),
-		"airmidAppResourceLocator": ioc.MustNewBeanDefinition(
+		"airmid.app.resource.locator": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*localResourceLocator)(nil)),
 			ioc.WithLazyMode(),
 		),
-		"airmidApplicationProps": ioc.MustNewBeanDefinition(
+		"airmid.app.props": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*airmidApplicationProps)(nil)),
 			ioc.WithLazyMode(),
 		),
-		"airmidAppRunnerCompositor": ioc.MustNewBeanDefinition(
+		"airmid.app.runner.compositor": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*RunnerCompositor)(nil)),
 			ioc.WithLazyMode(),
 		),
@@ -164,21 +164,21 @@ func (a *airmidApplication) runBeforeStartRunner(ctx context.Context, opt *optio
 	return nil
 }
 
-func (a *airmidApplication) loadProperties(_ context.Context) (err error) {
+func (a *airmidApplication) loadProperties(ctx context.Context) (err error) {
 	// First, we load the env & flags property, so user can
 	// configuration some application's setting.
-	if err := a.loadPropsFromEnvAndFlags(a); err != nil {
+	if err := a.loadPropsFromEnvAndFlags(ctx, a); err != nil {
 		return err
 	}
 
-	a.appConfig, err = ioc.GetBean[*config](a, "airmidAppConfig")
+	a.appConfig, err = ioc.GetBean[*config](ctx, a, "airmid.app.config")
 	if err != nil {
 		return err
 	}
 
 	// Second, we load the config file's property, base on
 	// env & flags property.
-	err = a.appConfig.loadProperty(a) //nolint:contextcheck
+	err = a.appConfig.loadProperty(ctx, a)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (a *airmidApplication) loadProperties(_ context.Context) (err error) {
 	// At last, we reload env & flags property, so env & flags
 	// property can overwrite config file's setting, and take
 	// high priority.
-	return a.loadPropsFromEnvAndFlags(a)
+	return a.loadPropsFromEnvAndFlags(ctx, a)
 }
 
 func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error) {
@@ -219,7 +219,7 @@ func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error)
 		return err
 	}
 
-	a.props, err = ioc.GetBean[*airmidApplicationProps](a, "airmidApplicationProps")
+	a.props, err = ioc.GetBean[*airmidApplicationProps](ctx, a, "airmid.app.props")
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error)
 		return err
 	}
 
-	err = a.PreInstantiateSingletons()
+	err = a.PreInstantiateSingletons(ctx)
 	if err != nil {
 		return err
 	}
@@ -245,11 +245,11 @@ func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error)
 	return nil
 }
 
-func (*airmidApplication) loadPropsFromEnvAndFlags(p props.Properties) error {
+func (*airmidApplication) loadPropsFromEnvAndFlags(ctx context.Context, p props.Properties) error {
 	epl := NewEnvPropertiesLoader("AIRMID_", DefaultEnvKeyConvertFunc)
 	apl := NewOptionArgsPropertiesLoader()
 	loaders := NewPropertiesLoaders()
-	return loaders.Add(epl).Add(apl).LoadProperties(p)
+	return loaders.Add(epl).Add(apl).LoadProperties(ctx, p)
 }
 
 func (a *airmidApplication) Shutdown() {
@@ -266,9 +266,10 @@ func (a *airmidApplication) Shutdown() {
 
 func (a *airmidApplication) shutdownWithMessage(msg string) {
 	a.Destroy()
+	ctx := context.Background()
 
-	slogctx.FromCtx(context.TODO()).InfoContext(
-		context.TODO(),
+	slogctx.FromCtx(ctx).InfoContext(
+		ctx,
 		fmt.Sprintf("Application will shutdown within: %s", msg),
 		slog.Any("ShutdownDuration", a.props.shutdownDuration),
 	)
@@ -278,14 +279,14 @@ func (a *airmidApplication) shutdownWithMessage(msg string) {
 
 	err := a.props.runnerCompositor.Stop(ctx)
 	if xerrors.Is(err, context.DeadlineExceeded) {
-		slogctx.FromCtx(context.TODO()).InfoContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).InfoContext(
+			ctx,
 			"Application shutdown duration was too long, force close...",
 			slog.Any("ShutdownDuration", a.props.shutdownDuration),
 		)
 	} else {
-		slogctx.FromCtx(context.TODO()).InfoContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).InfoContext(
+			ctx,
 			"All runners were stopped, application gracefully shutdown",
 		)
 	}

@@ -84,7 +84,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 		},
 	}
 	g := NewWithT(t)
-	p.PostProcessAfterInitialization(l, "l")
+	p.PostProcessAfterInitialization(context.Background(), l, "l")
 	g.Expect(app.listenerInvoker).To(HaveLen(4))
 
 	wg.Add(2)
@@ -98,7 +98,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 	wg.Wait()
 	g.Expect(atomic.LoadInt32(&count)).To(Equal(int32(15)))
 
-	p.PostProcessAfterInitialization(l, "l2")
+	p.PostProcessAfterInitialization(context.Background(), l, "l2")
 	g.Expect(app.listenerInvoker).To(HaveLen(4))
 }
 

@@ -67,9 +67,9 @@ func (mr *MockApplicationMockRecorder) Destroy() *gomock.Call {
 }
 
 // Get mocks base method.
-func (m *MockApplication) Get(key string, opts ...props.GetOption) (any, error) {
+func (m *MockApplication) Get(ctx context.Context, key string, opts ...props.GetOption) (any, error) {
 	m.ctrl.T.Helper()
-	varargs := []any{key}
+	varargs := []any{ctx, key}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
@@ -80,25 +80,25 @@ func (m *MockApplication) Get(key string, opts ...props.GetOption) (any, error) 
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockApplicationMockRecorder) Get(key any, opts ...any) *gomock.Call {
+func (mr *MockApplicationMockRecorder) Get(ctx, key any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{key}, opts...)
+	varargs := append([]any{ctx, key}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockApplication)(nil).Get), varargs...)
 }
 
 // GetBean mocks base method.
-func (m *MockApplication) GetBean(name string) (any, error) {
+func (m *MockApplication) GetBean(ctx context.Context, name string) (any, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBean", name)
+	ret := m.ctrl.Call(m, "GetBean", ctx, name)
 	ret0, _ := ret[0].(any)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBean indicates an expected call of GetBean.
-func (mr *MockApplicationMockRecorder) GetBean(name any) *gomock.Call {
+func (mr *MockApplicationMockRecorder) GetBean(ctx, name any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBean", reflect.TypeOf((*MockApplication)(nil).GetBean), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBean", reflect.TypeOf((*MockApplication)(nil).GetBean), ctx, name)
 }
 
 // GetBeanDefinition mocks base method.
@@ -117,17 +117,17 @@ func (mr *MockApplicationMockRecorder) GetBeanDefinition(beanName any) *gomock.C
 }
 
 // PreInstantiateSingletons mocks base method.
-func (m *MockApplication) PreInstantiateSingletons() error {
+func (m *MockApplication) PreInstantiateSingletons(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PreInstantiateSingletons")
+	ret := m.ctrl.Call(m, "PreInstantiateSingletons", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // PreInstantiateSingletons indicates an expected call of PreInstantiateSingletons.
-func (mr *MockApplicationMockRecorder) PreInstantiateSingletons() *gomock.Call {
+func (mr *MockApplicationMockRecorder) PreInstantiateSingletons(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PreInstantiateSingletons", reflect.TypeOf((*MockApplication)(nil).PreInstantiateSingletons))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PreInstantiateSingletons", reflect.TypeOf((*MockApplication)(nil).PreInstantiateSingletons), ctx)
 }
 
 // PublishEvent mocks base method.
@@ -199,18 +199,18 @@ func (mr *MockApplicationMockRecorder) RemoveBeanDefinition(beanName any) *gomoc
 }
 
 // ResolveBeanNames mocks base method.
-func (m *MockApplication) ResolveBeanNames(typ reflect.Type) ([]string, error) {
+func (m *MockApplication) ResolveBeanNames(ctx context.Context, typ reflect.Type) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ResolveBeanNames", typ)
+	ret := m.ctrl.Call(m, "ResolveBeanNames", ctx, typ)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ResolveBeanNames indicates an expected call of ResolveBeanNames.
-func (mr *MockApplicationMockRecorder) ResolveBeanNames(typ any) *gomock.Call {
+func (mr *MockApplicationMockRecorder) ResolveBeanNames(ctx, typ any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveBeanNames", reflect.TypeOf((*MockApplication)(nil).ResolveBeanNames), typ)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveBeanNames", reflect.TypeOf((*MockApplication)(nil).ResolveBeanNames), ctx, typ)
 }
 
 // Run mocks base method.
@@ -233,17 +233,17 @@ func (mr *MockApplicationMockRecorder) Run(ctx any, opts ...any) *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockApplication) Set(key string, val any) error {
+func (m *MockApplication) Set(ctx context.Context, key string, val any) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Set", key, val)
+	ret := m.ctrl.Call(m, "Set", ctx, key, val)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Set indicates an expected call of Set.
-func (mr *MockApplicationMockRecorder) Set(key, val any) *gomock.Call {
+func (mr *MockApplicationMockRecorder) Set(ctx, key, val any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockApplication)(nil).Set), key, val)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockApplication)(nil).Set), ctx, key, val)
 }
 
 // Shutdown mocks base method.

@@ -76,7 +76,7 @@ func (s *signalShutdownManager) Shutdown(msg string) {
 
 	s.shutdownOnce.Do(func() {
 		for _, handler := range s.handlers {
-			anvil.SafeRun(func() {
+			anvil.SafeRun(context.TODO(), func(context.Context) {
 				handler(msg)
 			})
 		}
