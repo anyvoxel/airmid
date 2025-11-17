@@ -77,7 +77,7 @@ func TestLoggerStartupHandler(t *testing.T) {
 			BeanFactory: ioc.NewBeanFactory(),
 		}
 		h := &loggerStartupHandler{}
-		app.Set("airmid.logger.handler.type", "json")
+		app.Set(context.Background(), "airmid.logger.handler.type", "json")
 		err := h.BeforeLoadProps(context.Background(), app, nil)
 		g.Expect(err).ToNot(HaveOccurred())
 
@@ -91,7 +91,7 @@ func TestLoggerStartupHandler(t *testing.T) {
 			BeanFactory: ioc.NewBeanFactory(),
 		}
 		h := &loggerStartupHandler{}
-		app.Set("airmid.logger.handler.opt.level", "iii")
+		app.Set(context.Background(), "airmid.logger.handler.opt.level", "iii")
 		err := h.BeforeLoadProps(context.Background(), app, nil)
 		g.Expect(err).ToNot(HaveOccurred())
 
@@ -106,7 +106,7 @@ func TestLoggerStartupHandler(t *testing.T) {
 			BeanFactory: ioc.NewBeanFactory(),
 		}
 		h := &loggerStartupHandler{}
-		app.Set("airmid.logger.handler.type", "iii")
+		app.Set(context.Background(), "airmid.logger.handler.type", "iii")
 		err := h.BeforeLoadProps(context.Background(), app, nil)
 		g.Expect(err).ToNot(HaveOccurred())
 

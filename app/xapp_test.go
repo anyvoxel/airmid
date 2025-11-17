@@ -78,7 +78,7 @@ func TestPublishEvent(t *testing.T) {
 	app.RegisterBeanDefinition("l", ioc.MustNewBeanDefinition(
 		reflect.TypeOf((*testApplicationListener)(nil)),
 	))
-	object, err := app.GetBean("l")
+	object, err := app.GetBean(context.Background(), "l")
 	g.Expect(err).ToNot(HaveOccurred())
 	l := object.(*testApplicationListener)
 

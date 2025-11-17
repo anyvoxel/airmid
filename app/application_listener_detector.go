@@ -41,11 +41,13 @@ func (l *applicationListenerDetector) PostProcessBeanDefinition(beanName string,
 	l.singletonNames[beanName] = beanDefinition.Scope() == ioc.ScopeSingleton
 }
 
-func (*applicationListenerDetector) PostProcessBeforeInitialization(obj any, _ string) (v any, err error) {
+func (*applicationListenerDetector) PostProcessBeforeInitialization(
+	_ context.Context, obj any, _ string) (v any, err error) {
 	return obj, nil
 }
 
-func (l *applicationListenerDetector) PostProcessAfterInitialization(obj any, beanName string) (v any, err error) {
+func (l *applicationListenerDetector) PostProcessAfterInitialization(
+	ctx context.Context, obj any, beanName string) (v any, err error) {
 	if !l.singletonNames[beanName] {
 		return obj, nil
 	}
@@ -60,8 +62,8 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(obj any, be
 		invoker, err := NewFnListenerInvoker(fn, m.Name, l.app)
 		if err != nil {
 			if xerrors.IsContinue(err) {
-				slogctx.FromCtx(context.TODO()).DebugContext(
-					context.TODO(),
+				slogctx.FromCtx(ctx).DebugContext(
+					ctx,
 					"bean method doesn't implement the listener, skip it",
 					slog.String("BeanName", beanName),
 					slog.String("MethodName", m.Name),
@@ -82,8 +84,8 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(obj any, be
 			return nil, err
 		}
 
-		slogctx.FromCtx(context.TODO()).DebugContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).DebugContext(
+			ctx,
 			"bean doesn't implement the listener, skip it",
 			slog.String("BeanName", beanName),
 			slog.Any("Error", err),

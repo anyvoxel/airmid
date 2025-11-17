@@ -61,7 +61,7 @@ func (m *metricsStartupHandler) BeforeLoadProps(_ context.Context, app *airmidAp
 	m.startupTime = time.Now()
 
 	beanDefinitions := map[string]ioc.BeanDefinition{
-		"airmidMetricsStartupHandlerConfiguration": ioc.MustNewBeanDefinition(
+		"airmid.metrics.startup.config": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*metricsStartupHandlerConfiguration)(nil)),
 			ioc.WithLazyMode(),
 		),
@@ -77,8 +77,8 @@ func (m *metricsStartupHandler) BeforeLoadProps(_ context.Context, app *airmidAp
 	return nil
 }
 
-func (*metricsStartupHandler) AfterLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
-	metricsC, err := ioc.GetBean[*metricsStartupHandlerConfiguration](app, "airmidMetricsStartupHandlerConfiguration")
+func (*metricsStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApplication, _ *option) error {
+	metricsC, err := ioc.GetBean[*metricsStartupHandlerConfiguration](ctx, app, "airmid.metrics.startup.config")
 	if err != nil {
 		return err
 	}

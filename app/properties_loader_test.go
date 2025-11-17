@@ -20,6 +20,7 @@
 package app
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -114,9 +115,9 @@ func TestEnvPropertiesLoader_LoadProperties(t *testing.T) {
 			}
 			p := props.NewProperties()
 			loader := NewEnvPropertiesLoader("AIRMID_", DefaultEnvKeyConvertFunc)
-			_ = loader.LoadProperties(p)
+			_ = loader.LoadProperties(context.Background(), p)
 			for k, v := range tc.expected {
-				actual, err := p.Get(k)
+				actual, err := p.Get(context.Background(), k)
 				if tc.isErr {
 					g.Expect(err).Should(gomega.HaveOccurred())
 					g.Expect(err.Error()).Should(gomega.Equal(tc.errMsg))
@@ -158,7 +159,7 @@ func TestOptionArgsPropertiesLoader_LoadProperties(t *testing.T) {
 			testBefore: func(properties props.Properties) {
 				_ = os.Setenv("AIRMID_TEST", "test_value")
 				envLoader := NewEnvPropertiesLoader("AIRMID_", DefaultEnvKeyConvertFunc)
-				_ = envLoader.LoadProperties(properties)
+				_ = envLoader.LoadProperties(context.Background(), properties)
 				os.Args = []string{"", "--test=test"}
 			},
 			testAfter: func() {
@@ -174,7 +175,7 @@ func TestOptionArgsPropertiesLoader_LoadProperties(t *testing.T) {
 			testBefore: func(properties props.Properties) {
 				_ = os.Setenv("AIRMID_TEST1", "test1")
 				envLoader := NewEnvPropertiesLoader("AIRMID_", DefaultEnvKeyConvertFunc)
-				_ = envLoader.LoadProperties(properties)
+				_ = envLoader.LoadProperties(context.Background(), properties)
 
 				os.Args = []string{"", "--test2=test2"}
 			},
@@ -208,13 +209,13 @@ func TestOptionArgsPropertiesLoader_LoadProperties(t *testing.T) {
 				c.testBefore(p)
 			}
 			loader := NewOptionArgsPropertiesLoader()
-			err := loader.LoadProperties(p)
+			err := loader.LoadProperties(context.Background(), p)
 			if c.isErr {
 				g.Expect(err).Should(gomega.HaveOccurred())
 				return
 			}
 			for k, v := range c.expect {
-				g.Expect(p.Get(k)).Should(gomega.Equal(v))
+				g.Expect(p.Get(context.Background(), k)).Should(gomega.Equal(v))
 			}
 			if c.testAfter != nil {
 				c.testAfter()
@@ -240,9 +241,9 @@ func TestPropertiesLoadersImpl_LoadProperties(t *testing.T) {
 	p := props.NewProperties()
 	envLoader := NewEnvPropertiesLoader("AIRMID_", DefaultEnvKeyConvertFunc)
 	loaders := NewPropertiesLoaders()
-	err := loaders.Add(envLoader).LoadProperties(p)
+	err := loaders.Add(envLoader).LoadProperties(context.Background(), p)
 
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
-	v, _ := p.Get("test1")
+	v, _ := p.Get(context.Background(), "test1")
 	g.Expect(v).Should(gomega.Equal("test1"))
 }

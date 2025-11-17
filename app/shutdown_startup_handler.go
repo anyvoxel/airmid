@@ -46,7 +46,7 @@ func (*shutdownStartupHandler) Name() string {
 
 func (*shutdownStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
 	beanDefinitions := map[string]ioc.BeanDefinition{
-		"airmidShutdownStartupHandlerConfiguration": ioc.MustNewBeanDefinition(
+		"airmid.shutdown.startup.config": ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*shutdownStartupHandlerConfigration)(nil)),
 			ioc.WithLazyMode(),
 		),
@@ -66,8 +66,9 @@ func (*shutdownStartupHandler) AfterLoadProps(_ context.Context, _ *airmidApplic
 	return nil
 }
 
-func (*shutdownStartupHandler) BeforeStartRunner(_ context.Context, app *airmidApplication, _ *option) error {
-	shutdownC, err := ioc.GetBean[*shutdownStartupHandlerConfigration](app, "airmidShutdownStartupHandlerConfiguration")
+func (*shutdownStartupHandler) BeforeStartRunner(ctx context.Context, app *airmidApplication, _ *option) error {
+	shutdownC, err := ioc.GetBean[*shutdownStartupHandlerConfigration](
+		ctx, app, "airmid.shutdown.startup.config")
 	if err != nil {
 		return err
 	}

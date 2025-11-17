@@ -41,11 +41,11 @@ func (*config) NewConfig() (*config, error) {
 }
 
 //nolint:revive,cyclop
-func (c *config) loadProperty(p props.Properties) error {
+func (c *config) loadProperty(ctx context.Context, p props.Properties) error {
 	resources := []Resource{}
 
-	slogctx.FromCtx(context.TODO()).DebugContext(
-		context.TODO(),
+	slogctx.FromCtx(ctx).DebugContext(
+		ctx,
 		"Configuration file extensions supported",
 		slog.Any("ConfigExtensions", c.ConfigExtensions),
 	)
@@ -59,8 +59,8 @@ func (c *config) loadProperty(p props.Properties) error {
 		resources = append(resources, ress...)
 	}
 
-	slogctx.FromCtx(context.TODO()).DebugContext(
-		context.TODO(),
+	slogctx.FromCtx(ctx).DebugContext(
+		ctx,
 		"Configuration file active profiles supported",
 		slog.Any("ActiveProfiles", c.ActiveProfiles),
 	)
@@ -77,8 +77,8 @@ func (c *config) loadProperty(p props.Properties) error {
 	}
 
 	for _, res := range resources {
-		slogctx.FromCtx(context.TODO()).DebugContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).DebugContext(
+			ctx,
 			"Loading configuration properties",
 			slog.String("FileName", res.Name()),
 		)
@@ -93,7 +93,7 @@ func (c *config) loadProperty(p props.Properties) error {
 		}
 
 		for k, v := range objs {
-			err := p.Set(k, v)
+			err := p.Set(ctx, k, v)
 			if err != nil {
 				return err
 			}

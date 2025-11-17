@@ -20,6 +20,7 @@
 package app
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -30,7 +31,7 @@ import (
 // PropertiesLoader is a loader for loading properties.
 type PropertiesLoader interface {
 	// LoadProperties loads properties to p
-	LoadProperties(p props.Properties) error
+	LoadProperties(ctx context.Context, p props.Properties) error
 }
 
 // PropertiesLoaders holds a set of loader.
@@ -62,17 +63,17 @@ func NewEnvPropertiesLoader(prefix string, keyConvertFn func(string) string,
 }
 
 // LoadProperties loads properties from environment variables.
-func (l *envPropertiesLoader) LoadProperties(p props.Properties) error {
-	for k, v := range l.envLoader.Load() {
+func (l *envPropertiesLoader) LoadProperties(ctx context.Context, p props.Properties) error {
+	for k, v := range l.envLoader.Load(ctx) {
 		key := l.keyConvertFn(k)
 		// if the env value is array, set to properties as key[0]=value0, key[1]=value1.
 		if values := strings.Split(v, ","); len(values) > 1 {
-			if err := p.Set(key, values); err != nil {
+			if err := p.Set(ctx, key, values); err != nil {
 				return err
 			}
 		} else {
 			// if the env value is a string or an array which only has one element, set to properties as key=value.
-			if err := p.Set(key, v); err != nil {
+			if err := p.Set(ctx, key, v); err != nil {
 				return err
 			}
 		}
@@ -98,7 +99,7 @@ func NewOptionArgsPropertiesLoader() PropertiesLoader {
 // LoadProperties loads properties from command line args.
 //
 //nolint:revive
-func (o *optionArgsPropertiesLoader) LoadProperties(p props.Properties) error {
+func (o *optionArgsPropertiesLoader) LoadProperties(ctx context.Context, p props.Properties) error {
 	for _, arg := range os.Args[1:] {
 		// TODO: support non-optional args, such as "--airmid.application.port 8080 -flag false"
 		parts := strings.SplitN(arg, "=", 2)
@@ -108,7 +109,7 @@ func (o *optionArgsPropertiesLoader) LoadProperties(p props.Properties) error {
 			if len(key) == 0 {
 				continue
 			}
-			if err := p.Set(key, true); err != nil {
+			if err := p.Set(ctx, key, true); err != nil {
 				return err
 			}
 		case 2:
@@ -119,12 +120,12 @@ func (o *optionArgsPropertiesLoader) LoadProperties(p props.Properties) error {
 			rawValue := parts[1]
 			// if the flag value is array, set to properties as key[0]=value0, key[1]=value1.
 			if values := strings.Split(rawValue, ","); len(values) > 1 {
-				if err := p.Set(key, values); err != nil {
+				if err := p.Set(ctx, key, values); err != nil {
 					return err
 				}
 			} else {
 				// if the flag value is a string or an array which only has one element, set to properties as key=value.
-				if err := p.Set(key, rawValue); err != nil {
+				if err := p.Set(ctx, key, rawValue); err != nil {
 					return err
 				}
 			}
@@ -148,9 +149,9 @@ func NewPropertiesLoaders() PropertiesLoaders {
 // 1. flags
 // 2. environment variables
 // 3. configurations.
-func (l *propertiesLoaders) LoadProperties(p props.Properties) error {
+func (l *propertiesLoaders) LoadProperties(ctx context.Context, p props.Properties) error {
 	for _, loader := range l.loaders {
-		if err := loader.LoadProperties(p); err != nil {
+		if err := loader.LoadProperties(ctx, p); err != nil {
 			return err
 		}
 	}

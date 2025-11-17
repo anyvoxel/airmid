@@ -42,7 +42,7 @@ func (i *objectListenerInvoker) Invoke(ctx context.Context, event ApplicationEve
 	if i.objAsync != nil {
 		anvil.Must(i.app.Submit(func() {
 			//nolint:contextcheck
-			anvil.SafeRun(func() {
+			anvil.SafeRun(ctx, func(ctx context.Context) {
 				i.objAsync.OnApplicationEventAsync(ctx, event)
 			})
 		}))

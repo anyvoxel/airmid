@@ -20,6 +20,7 @@
 package app
 
 import (
+	"context"
 	"io"
 	"testing"
 
@@ -69,10 +70,10 @@ k2: v2`)
 			nil,
 			nil,
 		)
-		mockProps.EXPECT().Set(gomock.Eq("k1"), gomock.Eq("v1")).Times(1).Return(nil)
-		mockProps.EXPECT().Set(gomock.Eq("k2"), gomock.Eq("v2")).Times(1).Return(nil)
+		mockProps.EXPECT().Set(context.Background(), gomock.Eq("k1"), gomock.Eq("v1")).Times(1).Return(nil)
+		mockProps.EXPECT().Set(context.Background(), gomock.Eq("k2"), gomock.Eq("v2")).Times(1).Return(nil)
 
-		err := c.loadProperty(mockProps)
+		err := c.loadProperty(context.Background(), mockProps)
 		g.Expect(err).ToNot(HaveOccurred())
 	})
 }

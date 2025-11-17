@@ -57,8 +57,8 @@ func TestAppRunnerCompositorProcessor(t *testing.T) {
 		p := &RunnerCompoistorProcessor{
 			appRunnerNames: map[Runner]string{},
 		}
-		p.PostProcessBeforeInitialization(1, "1")
-		p.PostProcessBeforeInitialization(&testAppRunner{}, "2")
+		p.PostProcessBeforeInitialization(context.Background(), 1, "1")
+		p.PostProcessBeforeInitialization(context.Background(), &testAppRunner{}, "2")
 
 		g.Expect(p.appRunnerNames).To(HaveLen(1))
 	})

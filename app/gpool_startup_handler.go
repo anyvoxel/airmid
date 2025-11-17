@@ -38,7 +38,7 @@ func (*gpoolStartupHandler) Name() string {
 
 func (*gpoolStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
 	return app.RegisterBeanDefinition(
-		"airmidGPoolFactory",
+		"airmid.gpool.factory",
 		ioc.MustNewBeanDefinition(
 			reflect.TypeOf((*GPoolFactory)(nil)),
 			ioc.WithLazyMode(),
@@ -46,8 +46,8 @@ func (*gpoolStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplic
 	)
 }
 
-func (*gpoolStartupHandler) AfterLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
-	gpoolFactoryObject, err := ioc.GetBean[*GPoolFactory](app, "airmidGPoolFactory")
+func (*gpoolStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApplication, _ *option) error {
+	gpoolFactoryObject, err := ioc.GetBean[*GPoolFactory](ctx, app, "airmid.gpool.factory")
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,8 @@
 package app
 
 import (
+	"context"
+
 	"github.com/anyvoxel/airmid/ioc"
 )
 
@@ -30,7 +32,8 @@ type ApplicationAwareProcessor struct {
 }
 
 // PostProcessBeforeInitialization implement the BeanPostProcessor.PostProcessBeforeInitialization.
-func (p *ApplicationAwareProcessor) PostProcessBeforeInitialization(obj any, _ string) (v any, err error) {
+func (p *ApplicationAwareProcessor) PostProcessBeforeInitialization(
+	_ context.Context, obj any, _ string) (v any, err error) {
 	if vobj := ioc.IndirectTo[ApplicationEventPublisherAware](obj); vobj != nil {
 		vobj.SetApplicationEventPublisher(p.app)
 	}
@@ -43,6 +46,7 @@ func (p *ApplicationAwareProcessor) PostProcessBeforeInitialization(obj any, _ s
 }
 
 // PostProcessAfterInitialization implement the BeanPostProcessor.PostProcessAfterInitialization.
-func (*ApplicationAwareProcessor) PostProcessAfterInitialization(obj any, _ string) (v any, err error) {
+func (*ApplicationAwareProcessor) PostProcessAfterInitialization(
+	_ context.Context, obj any, _ string) (v any, err error) {
 	return obj, nil
 }
