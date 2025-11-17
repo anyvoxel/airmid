@@ -20,6 +20,7 @@
 package props
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -252,7 +253,7 @@ func TestSet(t *testing.T) {
 		t.Run(tc.desp, func(t *testing.T) {
 			g := NewWithT(t)
 			p := NewProperties().(propertiesImpl)
-			err := p.Set(tc.key, tc.value)
+			err := p.Set(context.Background(), tc.key, tc.value)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).Should(MatchRegexp(tc.err))
@@ -685,7 +686,7 @@ func TestGet(t *testing.T) {
 				opts = append(opts, WithDefault(*tc.def))
 			}
 
-			actual, err := tc.p.Get(tc.key, opts...)
+			actual, err := tc.p.Get(context.Background(), tc.key, opts...)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(MatchRegexp(tc.err))

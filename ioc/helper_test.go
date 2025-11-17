@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -141,7 +142,7 @@ func TestGetBean(t *testing.T) {
 		g := NewWithT(t)
 		bf := NewBeanFactory()
 
-		o, err := GetBean[*nonproxyNamer](bf, "1")
+		o, err := GetBean[*nonproxyNamer](context.Background(), bf, "1")
 		g.Expect(err).To(HaveOccurred())
 		g.Expect(err.Error()).To(MatchRegexp(`No bean '1' registered: ObjectNotFound`))
 		g.Expect(o).To(BeNil())
@@ -152,7 +153,7 @@ func TestGetBean(t *testing.T) {
 		bf := NewBeanFactory()
 		bf.RegisterBeanDefinition("1", MustNewBeanDefinition(reflect.TypeOf((*proxyNamer)(nil))))
 
-		o, err := GetBean[*nonproxyNamer](bf, "1")
+		o, err := GetBean[*nonproxyNamer](context.Background(), bf, "1")
 		g.Expect(err).To(HaveOccurred())
 		g.Expect(err.Error()).To(MatchRegexp(`cannot convert \*ioc\.proxyNamer to \*ioc\.nonproxyNamer`))
 		g.Expect(o).To(BeNil())
@@ -163,7 +164,7 @@ func TestGetBean(t *testing.T) {
 		bf := NewBeanFactory()
 		bf.RegisterBeanDefinition("1", MustNewBeanDefinition(reflect.TypeOf((*nonproxyNamer)(nil))))
 
-		o, err := GetBean[*nonproxyNamer](bf, "1")
+		o, err := GetBean[*nonproxyNamer](context.Background(), bf, "1")
 		g.Expect(err).ToNot(HaveOccurred())
 		g.Expect(o).ToNot(BeNil())
 	})

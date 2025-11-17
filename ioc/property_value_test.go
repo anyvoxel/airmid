@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -49,7 +50,7 @@ func TestSetProperty(t *testing.T) {
 	p.AddValue(1, reflect.ValueOf("v2"))
 	p.AddValue(2, reflect.ValueOf([]int{0, 1}))
 	b := &testBean{}
-	p.SetProperty(reflect.ValueOf(b).Elem(), []FieldDescriptor{
+	p.SetProperty(context.Background(), reflect.ValueOf(b).Elem(), []FieldDescriptor{
 		{
 			FieldIndex: 0,
 			Name:       "v1",

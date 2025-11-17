@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -84,11 +85,11 @@ func TestBeanFactoryGetBean(t *testing.T) {
 				err := bf.RegisterBeanDefinition("bean2", MustNewBeanDefinition(reflect.TypeOf((*testBeanOnlyPropertyField)(nil)), WithBeanName("bean2")))
 				g.Expect(err).ToNot(HaveOccurred())
 
-				err = bf.Set("props.f0", "100")
+				err = bf.Set(context.Background(), "props.f0", "100")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f1", "200")
+				err = bf.Set(context.Background(), "props.f1", "200")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f2", []string{"1", "2"})
+				err = bf.Set(context.Background(), "props.f2", []string{"1", "2"})
 				g.Expect(err).ToNot(HaveOccurred())
 			},
 			beanName: "bean2",
@@ -108,11 +109,11 @@ func TestBeanFactoryGetBean(t *testing.T) {
 				err = bf.RegisterBeanDefinition("bean2", MustNewBeanDefinition(reflect.TypeOf((*testBeanOnlyBeanField)(nil))))
 				g.Expect(err).ToNot(HaveOccurred())
 
-				err = bf.Set("props.f0", "100")
+				err = bf.Set(context.Background(), "props.f0", "100")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f1", "200")
+				err = bf.Set(context.Background(), "props.f1", "200")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f2", []string{"1", "2"})
+				err = bf.Set(context.Background(), "props.f2", []string{"1", "2"})
 				g.Expect(err).ToNot(HaveOccurred())
 			},
 			beanName: "bean2",
@@ -161,11 +162,11 @@ func TestBeanFactoryGetBean(t *testing.T) {
 				err = bf.RegisterBeanDefinition("bean2", MustNewBeanDefinition(reflect.TypeOf((*testBeanMixField)(nil))))
 				g.Expect(err).ToNot(HaveOccurred())
 
-				err = bf.Set("props.f0", "100")
+				err = bf.Set(context.Background(), "props.f0", "100")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f1", "200")
+				err = bf.Set(context.Background(), "props.f1", "200")
 				g.Expect(err).ToNot(HaveOccurred())
-				err = bf.Set("props.f2", []string{"1", "2"})
+				err = bf.Set(context.Background(), "props.f2", []string{"1", "2"})
 				g.Expect(err).ToNot(HaveOccurred())
 			},
 			beanName: "bean2",
@@ -197,7 +198,7 @@ func TestBeanFactoryGetBean(t *testing.T) {
 			f := NewBeanFactory()
 			tc.initFunc(g, &tc, f)
 
-			actual, err := f.GetBean(tc.beanName)
+			actual, err := f.GetBean(context.Background(), tc.beanName)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(MatchRegexp(tc.err))
@@ -230,14 +231,14 @@ func TestGetBeanSingletonScope(t *testing.T) {
 		reflect.TypeOf((*testSingletonBean)(nil)),
 	))
 
-	obj1, err := bf.GetBean("bean1")
+	obj1, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	bean1 := obj1.(*testSingletonBean)
 	g.Expect(bean1.v).To(Equal(0))
 	bean1.v++
 	g.Expect(bean1.v).To(Equal(1))
 
-	obj2, err := bf.GetBean("bean1")
+	obj2, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	bean2 := obj2.(*testSingletonBean)
 	g.Expect(bean2.v).To(Equal(1))
@@ -253,7 +254,7 @@ type testPrototypeBean struct {
 	v int
 }
 
-func (b *testPrototypeBean) AfterPropertiesSet() error {
+func (b *testPrototypeBean) AfterPropertiesSet(context.Context) error {
 	prototypeBeanCount++
 	return nil
 }
@@ -266,7 +267,7 @@ func TestGetBeanPrototypeScope(t *testing.T) {
 		WithBeanScope(ScopePrototype),
 	))
 
-	obj1, err := bf.GetBean("bean1")
+	obj1, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	bean1 := obj1.(*testPrototypeBean)
 	g.Expect(bean1.v).To(Equal(0))
@@ -274,7 +275,7 @@ func TestGetBeanPrototypeScope(t *testing.T) {
 	bean1.v++
 	g.Expect(bean1.v).To(Equal(1))
 
-	obj2, err := bf.GetBean("bean1")
+	obj2, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	bean2 := obj2.(*testPrototypeBean)
 	g.Expect(bean2.v).To(Equal(0))
@@ -296,7 +297,7 @@ func TestResolveBeans(t *testing.T) {
 		reflect.TypeOf((*testBeanMixField)(nil)),
 	))
 
-	actual, err := bf.ResolveBeanNames(reflect.TypeOf((*fmt.Stringer)(nil)).Elem())
+	actual, err := bf.ResolveBeanNames(context.Background(), reflect.TypeOf((*fmt.Stringer)(nil)).Elem())
 	g.Expect(err).ToNot(HaveOccurred())
 
 	sort.Strings(actual)
@@ -313,7 +314,7 @@ func TestResolveBeansWithLazymode(t *testing.T) {
 		reflect.TypeOf((*testBeanOnlyPropertyField)(nil)),
 	))
 
-	actual, err := bf.ResolveBeanNames(reflect.TypeOf((*fmt.Stringer)(nil)).Elem())
+	actual, err := bf.ResolveBeanNames(context.Background(), reflect.TypeOf((*fmt.Stringer)(nil)).Elem())
 	g.Expect(err).ToNot(HaveOccurred())
 
 	sort.Strings(actual)
@@ -496,7 +497,7 @@ func TestGetBeanFromRegisterSingleton(t *testing.T) {
 	bean1 := pointer.StringPtr("1")
 	bf.RegisterSingleton("bean1", bean1)
 
-	obj1, err := bf.GetBean("bean1")
+	obj1, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	beanGet1 := obj1.(*string)
 	g.Expect(beanGet1).To(Equal(bean1))
@@ -526,7 +527,7 @@ func TestWithAwareBeanPostProcessor(t *testing.T) {
 	bf.RegisterBeanDefinition("bean1", MustNewBeanDefinition(
 		reflect.TypeOf((*testAware)(nil)),
 	))
-	obj, err := bf.GetBean("bean1")
+	obj, err := bf.GetBean(context.Background(), "bean1")
 	g.Expect(err).ToNot(HaveOccurred())
 	a := obj.(*testAware)
 	g.Expect(a).To(Equal(&testAware{
@@ -573,7 +574,7 @@ func TestPreInstantiateSingletons(t *testing.T) {
 	))
 	g.Expect(err).ToNot(HaveOccurred())
 
-	err = bf.PreInstantiateSingletons()
+	err = bf.PreInstantiateSingletons(context.Background())
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(bf.singletonObjects).To(HaveLen(1))
 	g.Expect(bf.singletonObjects["s1"].Interface()).To(Equal(&testSingleton1{
@@ -598,7 +599,7 @@ func TestPreInstantiateSingletonsWithMoreBeans(t *testing.T) {
 			))
 			g.Expect(err).ShouldNot(HaveOccurred())
 		}
-		err := br.PreInstantiateSingletons()
+		err := br.PreInstantiateSingletons(context.Background())
 		g.Expect(err).ShouldNot(HaveOccurred())
 		g.Expect(br.singletonObjects).To(HaveLen(beansCount))
 		for i := 0; i < beansCount; i++ {
@@ -613,7 +614,7 @@ func TestPreInstantiateSingletonsWithMoreBeans(t *testing.T) {
 		br := NewBeanFactory().(*beanFactoryImpl)
 
 		// We make this size bigger than runtime.NumCPU
-		err := br.PreInstantiateSingletons()
+		err := br.PreInstantiateSingletons(context.Background())
 		g.Expect(err).ShouldNot(HaveOccurred())
 		g.Expect(br.singletonObjects).To(BeEmpty())
 	})
@@ -642,7 +643,7 @@ func TestPreInstantiateSingletonsWithMoreBeans(t *testing.T) {
 
 			g.Expect(err).ShouldNot(HaveOccurred())
 		}
-		err := br.PreInstantiateSingletons()
+		err := br.PreInstantiateSingletons(context.Background())
 		g.Expect(err).To(HaveOccurred())
 		g.Expect(err.Error()).To(MatchRegexp(`property with key='props.1' not found`))
 	})
@@ -652,7 +653,7 @@ type smartSingleton struct {
 	a string
 }
 
-func (s *smartSingleton) AfterSingletonsInstantiated() error {
+func (s *smartSingleton) AfterSingletonsInstantiated(_ context.Context) error {
 	s.a = "AfterSingletonsInstantiated"
 	return nil
 }
@@ -664,7 +665,7 @@ func TestSmartInstantiateSingleton(t *testing.T) {
 		reflect.TypeOf((*smartSingleton)(nil)),
 	))
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = br.PreInstantiateSingletons()
+	err = br.PreInstantiateSingletons(context.Background())
 	g.Expect(err).ShouldNot(HaveOccurred())
 	smartObj := br.singletonObjects["smart_singleton"]
 	g.Expect(smartObj.Interface().(*smartSingleton).a).To(Equal("AfterSingletonsInstantiated"))
@@ -684,9 +685,9 @@ func TestAutowireCircularly_singleton(t *testing.T) {
 	g := NewWithT(t)
 	br := NewBeanFactory()
 
-	err := br.Set("a", "aaa")
+	err := br.Set(context.Background(), "a", "aaa")
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = br.Set("b", "bbb")
+	err = br.Set(context.Background(), "b", "bbb")
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	err = br.RegisterBeanDefinition("BeanA", MustNewBeanDefinition(reflect.TypeOf((*BeanA)(nil))))
@@ -694,7 +695,7 @@ func TestAutowireCircularly_singleton(t *testing.T) {
 	err = br.RegisterBeanDefinition("BeanB", MustNewBeanDefinition(reflect.TypeOf((*BeanB)(nil))))
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	a, err := br.GetBean("BeanA")
+	a, err := br.GetBean(context.Background(), "BeanA")
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	objA := a.(*BeanA)
@@ -708,9 +709,9 @@ func TestAutowireCircularly_prototype(t *testing.T) {
 	g := NewWithT(t)
 	br := NewBeanFactory()
 
-	err := br.Set("a", "aaa")
+	err := br.Set(context.Background(), "a", "aaa")
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = br.Set("b", "bbb")
+	err = br.Set(context.Background(), "b", "bbb")
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	err = br.RegisterBeanDefinition("BeanA", MustNewBeanDefinition(reflect.TypeOf((*BeanA)(nil)), WithBeanScope(ScopePrototype)))
@@ -718,7 +719,7 @@ func TestAutowireCircularly_prototype(t *testing.T) {
 	err = br.RegisterBeanDefinition("BeanB", MustNewBeanDefinition(reflect.TypeOf((*BeanB)(nil)), WithBeanScope(ScopePrototype)))
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	_, err = br.GetBean("BeanA")
+	_, err = br.GetBean(context.Background(), "BeanA")
 	g.Expect(err).Should(HaveOccurred())
 	g.Expect(err.Error()).Should(Equal("cannot get bean 'BeanA' circularly"))
 }
@@ -727,9 +728,9 @@ func TestGetBeanConcurrently_singleton(t *testing.T) {
 	g := NewWithT(t)
 	br := NewBeanFactory()
 
-	err := br.Set("a", "aaa")
+	err := br.Set(context.Background(), "a", "aaa")
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = br.Set("b", "bbb")
+	err = br.Set(context.Background(), "b", "bbb")
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	err = br.RegisterBeanDefinition("BeanA", MustNewBeanDefinition(reflect.TypeOf((*BeanA)(nil))))
@@ -741,7 +742,7 @@ func TestGetBeanConcurrently_singleton(t *testing.T) {
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
 		go func() {
-			objA, err := br.GetBean("BeanA")
+			objA, err := br.GetBean(context.Background(), "BeanA")
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(objA.(*BeanA).a).To(Equal("aaa"))
 			g.Expect(objA.(*BeanA).BeanB.BeanA[0].a).To(Equal("aaa"))
@@ -755,9 +756,9 @@ func TestGetBeanConcurrently_prototype(t *testing.T) {
 	g := NewWithT(t)
 	br := NewBeanFactory()
 
-	err := br.Set("a", "aaa")
+	err := br.Set(context.Background(), "a", "aaa")
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = br.Set("b", "bbb")
+	err = br.Set(context.Background(), "b", "bbb")
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	err = br.RegisterBeanDefinition("BeanA", MustNewBeanDefinition(reflect.TypeOf((*BeanA)(nil)), WithBeanScope(ScopePrototype)))
@@ -769,7 +770,7 @@ func TestGetBeanConcurrently_prototype(t *testing.T) {
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
 		go func() {
-			res, err := br.GetBean("BeanA")
+			res, err := br.GetBean(context.Background(), "BeanA")
 			g.Expect(res).To(BeNil())
 			g.Expect(err).Should(HaveOccurred())
 			g.Expect(err.Error()).Should(Equal("cannot get bean 'BeanA' circularly"))
@@ -791,7 +792,7 @@ func TestBeanFactory_Destroy(t *testing.T) {
 	g := NewWithT(t)
 	bf := NewBeanFactory().(*beanFactoryImpl)
 	bf.RegisterBeanDefinition("test-destruction", MustNewBeanDefinition(reflect.TypeOf((*testDestruction)(nil))))
-	obj, err := bf.GetBean("test-destruction")
+	obj, err := bf.GetBean(context.Background(), "test-destruction")
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(obj.(*testDestruction).str).To(Equal("test"))
 	bf.Destroy()
@@ -842,7 +843,7 @@ func TestAutowireMultipleCandidatesWithOnePrimary(t *testing.T) {
 	bf.RegisterBeanDefinition("test-bean", MustNewBeanDefinition(reflect.TypeOf((*testBean)(nil))))
 	bf.RegisterBeanDefinition("test-impl1", MustNewBeanDefinition(reflect.TypeOf((*impl1)(nil)), WithPrimary()))
 	bf.RegisterBeanDefinition("test-impl2", MustNewBeanDefinition(reflect.TypeOf((*impl2)(nil))))
-	obj, err := bf.GetBean("test-bean")
+	obj, err := bf.GetBean(context.Background(), "test-bean")
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(obj.(*testBean).test.Test()).To(Equal("primary"))
 }
@@ -853,7 +854,7 @@ func TestAutowireMultipleCandidatesWithMultiplePrimary(t *testing.T) {
 	bf.RegisterBeanDefinition("test-bean", MustNewBeanDefinition(reflect.TypeOf((*testBean)(nil))))
 	bf.RegisterBeanDefinition("test-impl1", MustNewBeanDefinition(reflect.TypeOf((*impl1)(nil)), WithPrimary()))
 	bf.RegisterBeanDefinition("test-impl2", MustNewBeanDefinition(reflect.TypeOf((*impl2)(nil)), WithPrimary()))
-	_, err := bf.GetBean("test-bean")
+	_, err := bf.GetBean(context.Background(), "test-bean")
 	g.Expect(err).Should(HaveOccurred())
 	g.Expect(err.Error()).To(Equal("'2' primary candidates found for field 'test' with type ioc.testInterface"))
 }
@@ -864,7 +865,7 @@ func TestAutowireMultipleCandidatesWithNotImplementInterfaceLazyLoadBean(t *test
 	bf.RegisterBeanDefinition("test-bean", MustNewBeanDefinition(reflect.TypeOf((*testBean)(nil))))
 	bf.RegisterBeanDefinition("test-impl1", MustNewBeanDefinition(reflect.TypeOf((*impl1)(nil)), WithLazyMode()))
 	bf.RegisterBeanDefinition("test-impl3", MustNewBeanDefinition(reflect.TypeOf((*impl3)(nil)), WithLazyMode()))
-	_, err := bf.GetBean("test-bean")
+	_, err := bf.GetBean(context.Background(), "test-bean")
 	g.Expect(err).Should(HaveOccurred())
 	g.Expect(err.Error()).To(Equal("'2' candidates found for field 'test' with type ioc.testInterface"))
 }

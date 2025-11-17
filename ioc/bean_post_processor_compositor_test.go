@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -59,7 +60,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv++
 							return obj, nil
@@ -68,7 +69,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv += 2
 							return obj, nil
@@ -86,14 +87,14 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							return nil, xerrors.Errorf(tc.desp)
 						},
 					},
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv += 2
 							return obj, nil
@@ -111,7 +112,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv++
 							return obj, nil
@@ -120,7 +121,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						BeforeInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							return nil, xerrors.Errorf(tc.desp)
 						},
 					},
@@ -136,7 +137,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 			g := NewWithT(t)
 			tc.init(&tc)
 
-			actual, err := tc.p.PostProcessBeforeInitialization(tc.obj, tc.desp)
+			actual, err := tc.p.PostProcessBeforeInitialization(context.Background(), tc.obj, tc.desp)
 
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
@@ -167,7 +168,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv++
 							return obj, nil
@@ -176,7 +177,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv += 2
 							return obj, nil
@@ -194,14 +195,14 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							return nil, xerrors.Errorf(tc.desp)
 						},
 					},
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv += 2
 							return obj, nil
@@ -219,7 +220,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 			init: func(tc *testCase) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							vv := obj.(*int)
 							*vv++
 							return obj, nil
@@ -228,7 +229,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 				)
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
-						AfterInitializationFunc: func(obj any, beanName string) (v any, err error) {
+						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
 							return nil, xerrors.Errorf(tc.desp)
 						},
 					},
@@ -244,7 +245,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 			g := NewWithT(t)
 			tc.init(&tc)
 
-			actual, err := tc.p.PostProcessAfterInitialization(tc.obj, tc.desp)
+			actual, err := tc.p.PostProcessAfterInitialization(context.Background(), tc.obj, tc.desp)
 
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())

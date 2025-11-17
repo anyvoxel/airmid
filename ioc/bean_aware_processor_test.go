@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -76,7 +77,7 @@ func TestBeanAwarePostProcessBeforeInitialization(t *testing.T) {
 			p := &BeanAwareProcessor{
 				beanFactory: NewBeanFactory(),
 			}
-			_, err := p.PostProcessBeforeInitialization(tc.obj, tc.name)
+			_, err := p.PostProcessBeforeInitialization(context.Background(), tc.obj, tc.name)
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(tc.obj).To(Equal(tc.expect))
 		})
@@ -102,7 +103,7 @@ func TestBeanAwarePostProcessAfterInitialization(t *testing.T) {
 		t.Run(tc.desp, func(t *testing.T) {
 			g := NewWithT(t)
 			p := &BeanAwareProcessor{}
-			_, err := p.PostProcessBeforeInitialization(tc.obj, tc.name)
+			_, err := p.PostProcessBeforeInitialization(context.Background(), tc.obj, tc.name)
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(tc.obj).To(Equal(tc.expect))
 		})

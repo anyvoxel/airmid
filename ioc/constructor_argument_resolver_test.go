@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -68,7 +69,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				},
 			},
 			initFunc: func(g *WithT, tc *testCase, bf BeanFactory) {
-				bf.Set("p1", "p1")
+				bf.Set(context.Background(), "p1", "p1")
 				bf.RegisterSingleton("b1", "b1")
 			},
 			expect: []any{
@@ -108,7 +109,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				},
 			},
 			initFunc: func(g *WithT, tc *testCase, bf BeanFactory) {
-				bf.Set("p3", "p1")
+				bf.Set(context.Background(), "p3", "p1")
 				bf.RegisterSingleton("b1", "b1")
 			},
 			expect: []any{},
@@ -143,7 +144,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				},
 			},
 			initFunc: func(g *WithT, tc *testCase, bf BeanFactory) {
-				bf.Set("p1", "p1")
+				bf.Set(context.Background(), "p1", "p1")
 			},
 			expect: []any{},
 			err:    "No bean 'b1' registered: ObjectNotFound",
