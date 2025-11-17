@@ -19,13 +19,18 @@
 
 package ioc
 
+import (
+	"context"
+)
+
 // BeanAwareProcessor is the processor to invoke aware method, it always execute before any custom BeanPostProcessor.
 type BeanAwareProcessor struct {
 	beanFactory BeanFactory
 }
 
 // PostProcessBeforeInitialization implement the BeanPostProcessor.PostProcessBeforeInitialization.
-func (p *BeanAwareProcessor) PostProcessBeforeInitialization(obj any, beanName string) (v any, err error) {
+func (p *BeanAwareProcessor) PostProcessBeforeInitialization(
+	_ context.Context, obj any, beanName string) (v any, err error) {
 	if vobj := IndirectTo[BeanNameAware](obj); vobj != nil {
 		vobj.SetBeanName(beanName)
 	}
@@ -38,6 +43,7 @@ func (p *BeanAwareProcessor) PostProcessBeforeInitialization(obj any, beanName s
 }
 
 // PostProcessAfterInitialization implement the BeanPostProcessor.PostProcessAfterInitialization.
-func (*BeanAwareProcessor) PostProcessAfterInitialization(obj any, _ string) (v any, err error) {
+func (*BeanAwareProcessor) PostProcessAfterInitialization(
+	_ context.Context, obj any, _ string) (v any, err error) {
 	return obj, nil
 }

@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 )
@@ -67,7 +68,7 @@ func (r *factoryConstructorArgumentResolver) Resolve(args []ConstructorArgument)
 		}
 	}
 	beanObject := reflect.New(reflect.StructOf(stFields))
-	err := r.bf.wireStruct(beanObject, fds)
+	err := r.bf.wireStruct(context.Background(), beanObject, fds)
 	if err != nil {
 		return nil, err
 	}

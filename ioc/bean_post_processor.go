@@ -19,6 +19,10 @@
 
 package ioc
 
+import (
+	"context"
+)
+
 // BeanPostProcessor hook that allows for custom modification of new bean instances.
 // For example, checking for marker interfaces or wrapping beans with proxies.
 type BeanPostProcessor interface {
@@ -26,35 +30,37 @@ type BeanPostProcessor interface {
 	// before any bean initialization callbacks.
 	// It will called before AfterPropertiesSet & custom init-method,
 	// and the bean will already be populated with property values.
-	PostProcessBeforeInitialization(obj any, beanName string) (v any, err error)
+	PostProcessBeforeInitialization(ctx context.Context, obj any, beanName string) (v any, err error)
 
 	// PostProcessAfterInitialization will been apply to the given new bean instance
 	// after any bean initialization callbacks.
-	PostProcessAfterInitialization(obj any, beanName string) (v any, err error)
+	PostProcessAfterInitialization(ctx context.Context, obj any, beanName string) (v any, err error)
 }
 
 // FuncBeanPostProcessor is the processor for compose function.
 // NOTE: this is used for unit test, be careful to use it.
 type FuncBeanPostProcessor struct {
-	BeforeInitializationFunc func(obj any, beanName string) (v any, err error)
-	AfterInitializationFunc  func(obj any, beanName string) (v any, err error)
+	BeforeInitializationFunc func(ctx context.Context, obj any, beanName string) (v any, err error)
+	AfterInitializationFunc  func(ctx context.Context, obj any, beanName string) (v any, err error)
 }
 
 var _ BeanPostProcessor = &FuncBeanPostProcessor{}
 
 // PostProcessBeforeInitialization implement BeanPostProcessor.PostProcessBeforeInitialization.
-func (p *FuncBeanPostProcessor) PostProcessBeforeInitialization(obj any, beanName string) (v any, err error) {
+func (p *FuncBeanPostProcessor) PostProcessBeforeInitialization(
+	ctx context.Context, obj any, beanName string) (v any, err error) {
 	if p.BeforeInitializationFunc != nil {
-		return p.BeforeInitializationFunc(obj, beanName)
+		return p.BeforeInitializationFunc(ctx, obj, beanName)
 	}
 
 	return obj, nil
 }
 
 // PostProcessAfterInitialization implement BeanPostProcessor.PostProcessAfterInitialization.
-func (p *FuncBeanPostProcessor) PostProcessAfterInitialization(obj any, beanName string) (v any, err error) {
+func (p *FuncBeanPostProcessor) PostProcessAfterInitialization(
+	ctx context.Context, obj any, beanName string) (v any, err error) {
 	if p.AfterInitializationFunc != nil {
-		return p.AfterInitializationFunc(obj, beanName)
+		return p.AfterInitializationFunc(ctx, obj, beanName)
 	}
 
 	return obj, nil

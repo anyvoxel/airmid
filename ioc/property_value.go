@@ -34,7 +34,7 @@ type PropertyValues interface {
 	AddValue(fieldIndex int, value reflect.Value)
 
 	// SetProperty will update the field value with property
-	SetProperty(obj reflect.Value, fieldDescriptors []FieldDescriptor) error
+	SetProperty(ctx context.Context, obj reflect.Value, fieldDescriptors []FieldDescriptor) error
 }
 
 type propertyValuesImpl struct {
@@ -52,12 +52,13 @@ func (p *propertyValuesImpl) AddValue(fieldIndex int, value reflect.Value) {
 	p.values[fieldIndex] = value
 }
 
-func (p *propertyValuesImpl) SetProperty(obj reflect.Value, fieldDescriptors []FieldDescriptor) error {
+func (p *propertyValuesImpl) SetProperty(
+	ctx context.Context, obj reflect.Value, fieldDescriptors []FieldDescriptor) error {
 	for _, fd := range fieldDescriptors {
 		value, ok := p.values[fd.FieldIndex]
 		if !ok {
-			slogctx.FromCtx(context.TODO()).DebugContext(
-				context.TODO(),
+			slogctx.FromCtx(ctx).DebugContext(
+				ctx,
 				"the value of field not found, skip it",
 				slog.Int("FieldIndex", fd.FieldIndex),
 				slog.String("FieldName", fd.Name),

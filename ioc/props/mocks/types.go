@@ -10,6 +10,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	props "github.com/anyvoxel/airmid/ioc/props"
@@ -41,9 +42,9 @@ func (m *MockProperties) EXPECT() *MockPropertiesMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockProperties) Get(key string, opts ...props.GetOption) (any, error) {
+func (m *MockProperties) Get(ctx context.Context, key string, opts ...props.GetOption) (any, error) {
 	m.ctrl.T.Helper()
-	varargs := []any{key}
+	varargs := []any{ctx, key}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
@@ -54,22 +55,22 @@ func (m *MockProperties) Get(key string, opts ...props.GetOption) (any, error) {
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockPropertiesMockRecorder) Get(key any, opts ...any) *gomock.Call {
+func (mr *MockPropertiesMockRecorder) Get(ctx, key any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{key}, opts...)
+	varargs := append([]any{ctx, key}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProperties)(nil).Get), varargs...)
 }
 
 // Set mocks base method.
-func (m *MockProperties) Set(key string, val any) error {
+func (m *MockProperties) Set(ctx context.Context, key string, val any) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Set", key, val)
+	ret := m.ctrl.Call(m, "Set", ctx, key, val)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Set indicates an expected call of Set.
-func (mr *MockPropertiesMockRecorder) Set(key, val any) *gomock.Call {
+func (mr *MockPropertiesMockRecorder) Set(ctx, key, val any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockProperties)(nil).Set), key, val)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockProperties)(nil).Set), ctx, key, val)
 }

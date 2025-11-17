@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -57,10 +58,10 @@ func IndirectTo[T any](o any) T {
 }
 
 // GetBean return the target beanObject.
-func GetBean[T any](f BeanFactory, beanName string) (T, error) {
+func GetBean[T any](ctx context.Context, f BeanFactory, beanName string) (T, error) {
 	var v T
 
-	beanObject, err := f.GetBean(beanName)
+	beanObject, err := f.GetBean(ctx, beanName)
 	if err != nil {
 		return v, err
 	}

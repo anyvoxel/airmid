@@ -42,7 +42,7 @@ func NewProperties() Properties {
 type propertiesImpl map[string]string
 
 //nolint:revive,cyclop
-func (p propertiesImpl) Get(key string, opts ...GetOption) (ret any, err error) {
+func (p propertiesImpl) Get(ctx context.Context, key string, opts ...GetOption) (ret any, err error) {
 	opt := defaultGetOption()
 	for _, o := range opts {
 		o.Apply(opt)
@@ -154,7 +154,7 @@ func (p propertiesImpl) doGetSlice(key string) ([]string, error) {
 }
 
 //nolint:revive,exhaustive
-func (p propertiesImpl) Set(key string, val any) error {
+func (p propertiesImpl) Set(ctx context.Context, key string, val any) error {
 	switch v := reflect.ValueOf(val); v.Kind() {
 	case reflect.Map:
 		// If the val is a map, we expand the val with keys and set it recursive
@@ -166,7 +166,7 @@ func (p propertiesImpl) Set(key string, val any) error {
 
 			kstr = fmt.Sprintf("%s.%s", key, kstr)
 			kvalue := v.MapIndex(k).Interface()
-			err = p.Set(kstr, kvalue)
+			err = p.Set(ctx, kstr, kvalue)
 			if err != nil {
 				return xerrors.Wrapf(err, "Cannot set val for map's key '%v'", kstr)
 			}
@@ -176,7 +176,7 @@ func (p propertiesImpl) Set(key string, val any) error {
 		for i := 0; i < v.Len(); i++ {
 			kstr := fmt.Sprintf("%s[%d]", key, i)
 			kvalue := v.Index(i).Interface()
-			err := p.Set(kstr, kvalue)
+			err := p.Set(ctx, kstr, kvalue)
 			if err != nil {
 				return xerrors.Wrapf(err, "Cannot set val for array/slice index's key '%v'", kstr)
 			}
@@ -187,8 +187,8 @@ func (p propertiesImpl) Set(key string, val any) error {
 			return xerrors.Wrapf(err, "Cannot convert value for key '%s' to string", key)
 		}
 		p[key] = value
-		slogctx.FromCtx(context.TODO()).DebugContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).DebugContext(
+			ctx,
 			"set property success",
 			slog.String("Key", key),
 			slog.String("Value", value),

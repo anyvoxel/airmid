@@ -19,6 +19,10 @@
 
 package ioc
 
+import (
+	"context"
+)
+
 // BeanPostProcessorCompositor is the compositor of BeanPostProcessor.
 type BeanPostProcessorCompositor interface {
 	// The compositor should implement the BeanPostProcessor
@@ -53,9 +57,10 @@ func NewBeanPostProcessorCompositor(beanPostProcessors ...BeanPostProcessor) Bea
 	return compositor
 }
 
-func (p *beanPostProcessorCompositorImpl) PostProcessBeforeInitialization(obj any, beanName string) (v any, err error) {
+func (p *beanPostProcessorCompositorImpl) PostProcessBeforeInitialization(
+	ctx context.Context, obj any, beanName string) (v any, err error) {
 	for _, beanPostProcessor := range p.beanPostProcessors {
-		obj, err = beanPostProcessor.PostProcessBeforeInitialization(obj, beanName)
+		obj, err = beanPostProcessor.PostProcessBeforeInitialization(ctx, obj, beanName)
 		if err != nil {
 			return nil, err
 		}
@@ -64,9 +69,10 @@ func (p *beanPostProcessorCompositorImpl) PostProcessBeforeInitialization(obj an
 	return obj, nil
 }
 
-func (p *beanPostProcessorCompositorImpl) PostProcessAfterInitialization(obj any, beanName string) (v any, err error) {
+func (p *beanPostProcessorCompositorImpl) PostProcessAfterInitialization(
+	ctx context.Context, obj any, beanName string) (v any, err error) {
 	for _, beanPostProcessor := range p.beanPostProcessors {
-		obj, err = beanPostProcessor.PostProcessAfterInitialization(obj, beanName)
+		obj, err = beanPostProcessor.PostProcessAfterInitialization(ctx, obj, beanName)
 		if err != nil {
 			return nil, err
 		}

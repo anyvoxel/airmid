@@ -38,10 +38,10 @@ import (
 // BeanFactory providing the full capabilities of SPI.
 type BeanFactory interface {
 	// GetBean return an instance, which may be shared or independent, of the specified bean.
-	GetBean(name string) (any, error)
+	GetBean(ctx context.Context, name string) (any, error)
 
 	// ResolveBeanNames return the bean names of the specified bean type.
-	ResolveBeanNames(typ reflect.Type) ([]string, error)
+	ResolveBeanNames(ctx context.Context, typ reflect.Type) ([]string, error)
 
 	// RegisterScope will register scope with name to factory
 	RegisterScope(name string, scope Scope) error
@@ -55,7 +55,7 @@ type BeanFactory interface {
 	AddBeanPostProcessor(beanPostProcessor BeanPostProcessor)
 
 	// PreInstantiateSingletons will pre initializing the non-lazy mode singletons
-	PreInstantiateSingletons() error
+	PreInstantiateSingletons(ctx context.Context) error
 
 	// Destroy will destroy the beans before bean destruction.
 	Destroy()
@@ -97,14 +97,14 @@ type beanFactoryImpl struct {
 	mu sync.RWMutex
 }
 
-func (f *beanFactoryImpl) GetBean(name string) (any, error) {
+func (f *beanFactoryImpl) GetBean(ctx context.Context, name string) (any, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	return f.getBeanLocked(name)
+	return f.getBeanLocked(ctx, name)
 }
 
 //nolint:revive,cyclop
-func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
+func (f *beanFactoryImpl) getBeanLocked(ctx context.Context, name string) (any, error) {
 	if obj, ok := f.singletonObjects[name]; ok {
 		return obj.Interface(), nil
 	}
@@ -141,7 +141,7 @@ func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
 	f.beansInCreating[name] = v.Interface()
 	defer delete(f.beansInCreating, name)
 
-	err = f.wireStruct(v, beanDefinition.FieldDescriptors())
+	err = f.wireStruct(ctx, v, beanDefinition.FieldDescriptors())
 	if err != nil {
 		return nil, err
 	}
@@ -153,31 +153,31 @@ func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
 
 	obj := v.Interface()
 
-	if obj, err = f.beanPostProcessorCompositor.PostProcessBeforeInitialization(obj, name); err != nil {
+	if obj, err = f.beanPostProcessorCompositor.PostProcessBeforeInitialization(ctx, obj, name); err != nil {
 		return nil, err
 	}
 
 	if vobj := IndirectTo[InitializingBean](obj); vobj != nil {
-		slogctx.FromCtx(context.TODO()).DebugContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).DebugContext(
+			ctx,
 			"bean impelemented the InitializingBean interface, will execute it",
 			slog.String("BeanName", name),
 		)
 
-		err := vobj.AfterPropertiesSet()
+		err := vobj.AfterPropertiesSet(ctx)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		slogctx.FromCtx(context.TODO()).DebugContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).DebugContext(
+			ctx,
 			"bean doesn't impelemented the InitializingBean interface, will skip it",
 			slog.String("BeanName", name),
 		)
 	}
 
 	//nolint
-	if obj, err = f.beanPostProcessorCompositor.PostProcessAfterInitialization(obj, name); err != nil {
+	if obj, err = f.beanPostProcessorCompositor.PostProcessAfterInitialization(ctx, obj, name); err != nil {
 		return nil, err
 	}
 
@@ -193,14 +193,14 @@ func (f *beanFactoryImpl) getBeanLocked(name string) (any, error) {
 // wireStruct will inject the field value into bean.
 // 1. the bean must be pointer to struct.
 // 2. it will return err when any inject failed.
-func (f *beanFactoryImpl) wireStruct(bean reflect.Value, fds []FieldDescriptor) error {
+func (f *beanFactoryImpl) wireStruct(ctx context.Context, bean reflect.Value, fds []FieldDescriptor) error {
 	if len(fds) == 0 {
 		return nil
 	}
 
 	propertyValues := NewPropertyValues()
 	for _, fd := range fds {
-		fn := func(_ FieldDescriptor, _ PropertyValues) error {
+		fn := func(_ context.Context, _ FieldDescriptor, _ PropertyValues) error {
 			return xerrors.ErrNotImplement
 		}
 
@@ -211,15 +211,16 @@ func (f *beanFactoryImpl) wireStruct(bean reflect.Value, fds []FieldDescriptor) 
 			fn = f.getBeanValue
 		}
 
-		if err := fn(fd, propertyValues); err != nil {
+		if err := fn(ctx, fd, propertyValues); err != nil {
 			return err
 		}
 	}
 
-	return propertyValues.SetProperty(bean.Elem(), fds)
+	return propertyValues.SetProperty(ctx, bean.Elem(), fds)
 }
 
-func (f *beanFactoryImpl) getPropertyValue(fd FieldDescriptor, propertyValues PropertyValues) error {
+func (f *beanFactoryImpl) getPropertyValue(
+	ctx context.Context, fd FieldDescriptor, propertyValues PropertyValues) error {
 	if fd.Property == nil {
 		return nil
 	}
@@ -236,7 +237,7 @@ func (f *beanFactoryImpl) getPropertyValue(fd FieldDescriptor, propertyValues Pr
 	}
 
 	opts = append(opts, props.WithType(typ))
-	value, err := f.Get(fd.Property.Name, opts...)
+	value, err := f.Get(ctx, fd.Property.Name, opts...)
 	if err != nil {
 		return err
 	}
@@ -249,20 +250,21 @@ func (f *beanFactoryImpl) getPropertyValue(fd FieldDescriptor, propertyValues Pr
 	return nil
 }
 
-func (f *beanFactoryImpl) getBeanValue(fd FieldDescriptor, propertyValues PropertyValues) error {
+func (f *beanFactoryImpl) getBeanValue(ctx context.Context, fd FieldDescriptor, propertyValues PropertyValues) error {
 	if fd.Bean == nil {
 		return nil
 	}
 
 	if fd.Bean.Name != "?" {
-		return f.getNamedBeanValue(fd, propertyValues)
+		return f.getNamedBeanValue(ctx, fd, propertyValues)
 	}
 
-	return f.getTypedBeanValue(fd, propertyValues)
+	return f.getTypedBeanValue(ctx, fd, propertyValues)
 }
 
-func (f *beanFactoryImpl) getNamedBeanValue(fd FieldDescriptor, propertyValues PropertyValues) error {
-	obj, err := f.getBeanLocked(fd.Bean.Name)
+func (f *beanFactoryImpl) getNamedBeanValue(
+	ctx context.Context, fd FieldDescriptor, propertyValues PropertyValues) error {
+	obj, err := f.getBeanLocked(ctx, fd.Bean.Name)
 	if err != nil {
 		if xerrors.IsNotFound(err) && fd.Bean.Optional {
 			return nil
@@ -274,22 +276,23 @@ func (f *beanFactoryImpl) getNamedBeanValue(fd FieldDescriptor, propertyValues P
 	return nil
 }
 
-func (f *beanFactoryImpl) getTypedBeanValue(fd FieldDescriptor, propertyValues PropertyValues) error {
-	primaryBeans, beans, err := f.getTypedCandidatesBeanNames(fd)
+func (f *beanFactoryImpl) getTypedBeanValue(
+	ctx context.Context, fd FieldDescriptor, propertyValues PropertyValues) error {
+	primaryBeans, beans, err := f.getTypedCandidatesBeanNames(ctx, fd)
 	if err != nil {
 		return err
 	}
 
 	if fd.Typ.Kind() != reflect.Slice {
-		return f.getTypedBeanNoneSliceValue(primaryBeans, beans, fd, propertyValues)
+		return f.getTypedBeanNoneSliceValue(ctx, primaryBeans, beans, fd, propertyValues)
 	}
-	return f.getTypedBeanSliceValue(beans, fd, propertyValues)
+	return f.getTypedBeanSliceValue(ctx, beans, fd, propertyValues)
 }
 
 func (f *beanFactoryImpl) getTypedBeanNoneSliceValue(
-	primaryBeans []string, beans []string, fd FieldDescriptor, propertyValues PropertyValues) error {
+	ctx context.Context, primaryBeans []string, beans []string, fd FieldDescriptor, propertyValues PropertyValues) error {
 	if len(primaryBeans) == 1 {
-		beanValue, err := f.getBeanLockedAsValue(primaryBeans[0])
+		beanValue, err := f.getBeanLockedAsValue(ctx, primaryBeans[0])
 		if err != nil {
 			return err
 		}
@@ -315,7 +318,7 @@ func (f *beanFactoryImpl) getTypedBeanNoneSliceValue(
 		return xerrors.Errorf("'%v' candidates found for field '%v' with type %s", len(beans), fd.Name, fd.Typ.String())
 	}
 
-	beanValue, err := f.getBeanLockedAsValue(beans[0])
+	beanValue, err := f.getBeanLockedAsValue(ctx, beans[0])
 	if err != nil {
 		return err
 	}
@@ -324,10 +327,10 @@ func (f *beanFactoryImpl) getTypedBeanNoneSliceValue(
 }
 
 func (f *beanFactoryImpl) getTypedBeanSliceValue(
-	beanNames []string, fd FieldDescriptor, propertyValues PropertyValues) error {
+	ctx context.Context, beanNames []string, fd FieldDescriptor, propertyValues PropertyValues) error {
 	candidates := make(CandidateBeans, 0, len(beanNames))
 	for _, beanName := range beanNames {
-		bean, err := f.getBeanLockedAsValue(beanName)
+		bean, err := f.getBeanLockedAsValue(ctx, beanName)
 		if err != nil {
 			return err
 		}
@@ -344,13 +347,14 @@ func (f *beanFactoryImpl) getTypedBeanSliceValue(
 	return nil
 }
 
-func (f *beanFactoryImpl) getTypedCandidatesBeanNames(fd FieldDescriptor) ([]string, []string, error) {
+func (f *beanFactoryImpl) getTypedCandidatesBeanNames(
+	ctx context.Context, fd FieldDescriptor) ([]string, []string, error) {
 	elemType := fd.Typ
 	if fd.Typ.Kind() == reflect.Slice {
 		elemType = elemType.Elem()
 	}
 
-	beanNames, err := f.ResolveBeanNames(elemType)
+	beanNames, err := f.ResolveBeanNames(ctx, elemType)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -371,8 +375,8 @@ func (f *beanFactoryImpl) getTypedCandidatesBeanNames(fd FieldDescriptor) ([]str
 	return primaryBeans, beans, nil
 }
 
-func (f *beanFactoryImpl) getBeanLockedAsValue(beanName string) (reflect.Value, error) {
-	obj, err := f.getBeanLocked(beanName)
+func (f *beanFactoryImpl) getBeanLockedAsValue(ctx context.Context, beanName string) (reflect.Value, error) {
+	obj, err := f.getBeanLocked(ctx, beanName)
 	if err != nil {
 		return reflect.Value{}, err
 	}
@@ -380,7 +384,7 @@ func (f *beanFactoryImpl) getBeanLockedAsValue(beanName string) (reflect.Value, 
 	return reflect.ValueOf(obj), nil
 }
 
-func (f *beanFactoryImpl) ResolveBeanNames(typ reflect.Type) ([]string, error) {
+func (f *beanFactoryImpl) ResolveBeanNames(_ context.Context, typ reflect.Type) ([]string, error) {
 	beanNames := []string{}
 	f.VisitBeanDefinition(FuncVisitor{
 		VisitFunc: func(s string, bd BeanDefinition) {
@@ -431,7 +435,7 @@ func (f *beanFactoryImpl) AddBeanPostProcessor(beanPostProcessor BeanPostProcess
 	f.beanPostProcessorCompositor.AddBeanPostProcessor(beanPostProcessor)
 }
 
-func (f *beanFactoryImpl) PreInstantiateSingletons() error {
+func (f *beanFactoryImpl) PreInstantiateSingletons(ctx context.Context) error {
 	beanNames := []string{}
 	f.VisitBeanDefinition(FuncVisitor{
 		VisitFunc: func(s string, bd BeanDefinition) {
@@ -441,21 +445,21 @@ func (f *beanFactoryImpl) PreInstantiateSingletons() error {
 		},
 	})
 
-	if err := f.doConcurrentInstantiateSingleton(beanNames); err != nil {
+	if err := f.doConcurrentInstantiateSingleton(ctx, beanNames); err != nil {
 		return err
 	}
 
 	for name, obj := range f.singletonObjects {
 		if smartSingleton := IndirectTo[SmartInitializingSingleton](obj.Interface()); smartSingleton != nil {
-			slogctx.FromCtx(context.TODO()).DebugContext(
-				context.TODO(),
+			slogctx.FromCtx(ctx).DebugContext(
+				ctx,
 				"singleton bean has implements SmartInitializingSingleton, will execute it",
 				slog.String("BeanName", name),
 			)
 
-			if err := smartSingleton.AfterSingletonsInstantiated(); err != nil {
-				slogctx.FromCtx(context.TODO()).ErrorContext(
-					context.TODO(),
+			if err := smartSingleton.AfterSingletonsInstantiated(ctx); err != nil {
+				slogctx.FromCtx(ctx).ErrorContext(
+					ctx,
 					"Smart instantiate singleton bean failed",
 					slog.String("BeanName", name),
 					slog.Any("Error", err),
@@ -463,8 +467,8 @@ func (f *beanFactoryImpl) PreInstantiateSingletons() error {
 				return err
 			}
 		} else {
-			slogctx.FromCtx(context.TODO()).DebugContext(
-				context.TODO(),
+			slogctx.FromCtx(ctx).DebugContext(
+				ctx,
 				"singleton bean has not implements SmartInitializingSingleton, will skip it",
 				slog.String("BeanName", name),
 			)
@@ -473,16 +477,16 @@ func (f *beanFactoryImpl) PreInstantiateSingletons() error {
 	return nil
 }
 
-func (f *beanFactoryImpl) doConcurrentInstantiateSingleton(beanNames []string) error {
+func (f *beanFactoryImpl) doConcurrentInstantiateSingleton(ctx context.Context, beanNames []string) error {
 	if len(beanNames) == 0 {
 		return nil
 	}
 
-	return parallel.Run(context.TODO(), len(beanNames), func(idx int) error {
-		_, err := f.GetBean(beanNames[idx])
+	return parallel.Run(ctx, len(beanNames), func(idx int) error {
+		_, err := f.GetBean(ctx, beanNames[idx])
 		if err != nil {
-			slogctx.FromCtx(context.TODO()).ErrorContext(
-				context.TODO(),
+			slogctx.FromCtx(ctx).ErrorContext(
+				ctx,
 				"instantiate singleton bean failed",
 				slog.String("BeanName", beanNames[idx]),
 				slog.Any("Error", err),
@@ -490,8 +494,8 @@ func (f *beanFactoryImpl) doConcurrentInstantiateSingleton(beanNames []string) e
 			return err
 		}
 
-		slogctx.FromCtx(context.TODO()).InfoContext(
-			context.TODO(),
+		slogctx.FromCtx(ctx).InfoContext(
+			ctx,
 			"instantiate singleton bean",
 			slog.String("BeanName", beanNames[idx]),
 		)
