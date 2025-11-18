@@ -48,7 +48,7 @@ func (r *runner1) Run(ctx context.Context) {
 		desp:             "e1",
 	})
 
-	attr, _ := r.application.Get("attr")
+	attr, _ := r.application.Get(ctx, "attr")
 	slogctx.FromCtx(ctx).InfoContext(ctx, fmt.Sprintf("Runner1 get properties: %s=%v", "attr", attr))
 
 	r.application.Submit(func() {

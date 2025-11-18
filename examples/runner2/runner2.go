@@ -109,7 +109,7 @@ func (r *Runner2) Run(ctx context.Context) {
 	}()
 }
 
-func (r *Runner2) AfterPropertiesSet() error {
+func (r *Runner2) AfterPropertiesSet(context.Context) error {
 	handler := http.NewServeMux()
 	handler.Handle("/", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		fmt.Printf("Handler http request\n")
