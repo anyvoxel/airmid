@@ -25,7 +25,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
@@ -77,11 +77,10 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "",
-			expect: pointer.IntPtr(3),
-		},
-		{
+			expect: anvil.Ptr(3),
+		}, {
 			desp: "failed at 1",
 			p:    NewBeanPostProcessorCompositor().(*beanPostProcessorCompositorImpl),
 			init: func(tc *testCase) {
@@ -102,7 +101,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "failed at 1",
 			expect: nil,
 		},
@@ -127,7 +126,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "failed at 2",
 			expect: nil,
 		},
@@ -185,9 +184,9 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "",
-			expect: pointer.IntPtr(3),
+			expect: anvil.Ptr(3),
 		},
 		{
 			desp: "failed at 1",
@@ -210,7 +209,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "failed at 1",
 			expect: nil,
 		},
@@ -235,7 +234,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 					},
 				)
 			},
-			obj:    pointer.IntPtr(0),
+			obj:    anvil.Ptr(0),
 			err:    "failed at 2",
 			expect: nil,
 		},

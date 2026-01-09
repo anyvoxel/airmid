@@ -25,6 +25,7 @@ import (
 
 	_ "go.uber.org/automaxprocs" //nolint
 
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/ioc"
 	"github.com/anyvoxel/airmid/ioc/props"
 )
@@ -49,7 +50,7 @@ func Get(ctx context.Context, key string, opts ...props.GetOption) (any, error) 
 }
 
 // Run wraps Application.Run function.
-func Run(ctx context.Context, opts ...Option) error {
+func Run(ctx context.Context, opts ...anvil.Option[appOption]) error {
 	return app.Run(ctx, opts...)
 }
 

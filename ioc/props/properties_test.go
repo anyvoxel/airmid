@@ -27,7 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 )
 
 func TestSet(t *testing.T) {
@@ -307,7 +307,7 @@ func TestGet(t *testing.T) {
 				"k1": "v1",
 			}),
 			key:    "k0",
-			def:    pointer.StringPtr("1"),
+			def:    anvil.Ptr("1"),
 			err:    "",
 			expect: "1",
 		},
@@ -317,7 +317,7 @@ func TestGet(t *testing.T) {
 				"k1": "v1",
 			}),
 			key:    "k1",
-			def:    pointer.StringPtr("1"),
+			def:    anvil.Ptr("1"),
 			err:    "",
 			expect: "v1",
 		},
@@ -663,7 +663,7 @@ func TestGet(t *testing.T) {
 				s := []string{}
 				return &s
 			}(),
-			def: pointer.StringPtr("false,true"),
+			def: anvil.Ptr("false,true"),
 			err: "",
 			expect: func() any {
 				v := []string{"false", "true"}

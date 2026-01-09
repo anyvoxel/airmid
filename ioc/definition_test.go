@@ -25,7 +25,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 )
 
 type testAutowireBean struct {
@@ -83,7 +83,7 @@ func TestNewBeanDefinition(t *testing.T) {
 						Unexported: false,
 						Property: &PropertyFieldDescriptor{
 							Name:    "f3v",
-							Default: pointer.StringPtr("f3vd"),
+							Default: anvil.Ptr("f3vd"),
 						},
 						Bean: nil,
 					},
@@ -140,7 +140,7 @@ func TestNewBeanDefinition(t *testing.T) {
 						Unexported: false,
 						Property: &PropertyFieldDescriptor{
 							Name:    "f3v",
-							Default: pointer.StringPtr("f3vd"),
+							Default: anvil.Ptr("f3vd"),
 						},
 						Bean: nil,
 					},

@@ -26,7 +26,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 )
 
 func TestFactoryResolverResolve(t *testing.T) {
@@ -53,7 +53,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				{
 					Property: &PropertyFieldDescriptor{
 						Name:    "p2",
-						Default: pointer.StringPtr("2"),
+						Default: anvil.Ptr("2"),
 					},
 					Type: reflect.TypeOf(""),
 				},
@@ -93,7 +93,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				{
 					Property: &PropertyFieldDescriptor{
 						Name:    "p2",
-						Default: pointer.StringPtr("2"),
+						Default: anvil.Ptr("2"),
 					},
 					Type: reflect.TypeOf(""),
 				},
@@ -128,7 +128,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				{
 					Property: &PropertyFieldDescriptor{
 						Name:    "p2",
-						Default: pointer.StringPtr("2"),
+						Default: anvil.Ptr("2"),
 					},
 					Type: reflect.TypeOf(""),
 				},

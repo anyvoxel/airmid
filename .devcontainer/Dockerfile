@@ -25,5 +25,10 @@ RUN sed -i 's|http://deb.debian.org/|http://mirrors.aliyun.com/|g' /etc/apt/sour
     && VERSION="1.51.0" \
     && curl -sSL "https://github.com/bufbuild/buf/releases/download/v${VERSION}/buf-$(uname -s)-$(uname -m).tar.gz" | \
     tar -xvzf - -C "${PREFIX}" --strip-components 1 \
+    && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.4.0 \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g @google/gemini-cli \
     && rm -rf /var/lib/apt/lists/* \
-    && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.4.0
+    && go install golang.org/x/tools/cmd/goimports@latest \
+    && chown -R vscode:golang /go/pkg

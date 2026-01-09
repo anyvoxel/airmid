@@ -24,7 +24,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
@@ -133,7 +133,7 @@ func NewPropertyFieldDescriptor(value string) (*PropertyFieldDescriptor, error) 
 		Name: vv[0],
 	}
 	if len(vv) > 1 {
-		fd.Default = pointer.StringPtr(vv[1])
+		fd.Default = anvil.Ptr(vv[1])
 	}
 	return fd, nil
 }

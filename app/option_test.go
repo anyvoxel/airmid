@@ -23,12 +23,14 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+
+	"github.com/anyvoxel/airmid/anvil"
 )
 
 func TestWithAttributes(t *testing.T) {
 	g := NewWithT(t)
 
-	o := newOption([]Option{
+	o := newOption([]anvil.Option[appOption]{
 		WithAttributes(Attribute{
 			Key:   "k1",
 			Value: "v1",
@@ -44,7 +46,7 @@ func TestWithAttributes(t *testing.T) {
 			},
 		),
 	})
-	g.Expect(o).To(Equal(&option{
+	g.Expect(o).To(Equal(&appOption{
 		attrs: []Attribute{
 			{
 				Key:   "k1",

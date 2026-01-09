@@ -29,34 +29,34 @@ import (
 func TestComplete(t *testing.T) {
 	type testCase struct {
 		desp   string
-		o      *option
-		expect *option
+		o      *parallelOption
+		expect *parallelOption
 		err    string
 	}
 	testCases := []testCase{
 		{
 			desp: "count validate error",
-			o:    &option{},
+			o:    &parallelOption{},
 			err:  "count '0'",
 		},
 		{
 			desp: "with default numcpu",
-			o: &option{
+			o: &parallelOption{
 				concurrent: 0,
 				count:      runtime.NumCPU() + 1,
 			},
-			expect: &option{
+			expect: &parallelOption{
 				concurrent: runtime.NumCPU(),
 				count:      runtime.NumCPU() + 1,
 			},
 		},
 		{
 			desp: "with min concurrent",
-			o: &option{
+			o: &parallelOption{
 				concurrent: 10,
 				count:      9,
 			},
-			expect: &option{
+			expect: &parallelOption{
 				concurrent: 9,
 				count:      9,
 			},
@@ -83,6 +83,7 @@ func TestWithConcurrent(t *testing.T) {
 	o := defaultOption()
 	g.Expect(o.concurrent).To(Equal(runtime.NumCPU()))
 
-	WithConcurrent(1)(o)
+	opt := WithConcurrent(1)
+	opt.Apply(o)
 	g.Expect(o.concurrent).To(Equal(1))
 }

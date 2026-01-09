@@ -22,6 +22,7 @@ package parallel
 
 import (
 	"context"
+	"sync"
 
 	"github.com/anyvoxel/airmid/anvil"
 )
@@ -29,13 +30,16 @@ import (
 // Run will execute workFunc on every idx in count.
 //
 //nolint:revive,cyclop
-func Run(parentCtx context.Context, count int, workFunc func(int) error, opts ...Option) error {
+func Run(parentCtx context.Context, count int, workFunc func(int) error, opts ...anvil.Option[parallelOption]) error {
 	o := defaultOption()
-	opts = append(opts, func(o *option) {
+	applyOpts := make([]anvil.Option[parallelOption], len(opts)+1)
+	applyOpts[0] = anvil.NewFnOption(func(o *parallelOption) {
 		o.count = count
 	})
-	for _, opt := range opts {
-		opt(o)
+	copy(applyOpts[1:], opts)
+
+	for _, opt := range applyOpts {
+		opt.Apply(o)
 	}
 	if err := o.Complete(); err != nil {
 		return err
@@ -55,9 +59,9 @@ func Run(parentCtx context.Context, count int, workFunc func(int) error, opts ..
 	}
 	close(idxCh)
 
-	wg := anvil.WaitGroupWrapper{}
+	wg := sync.WaitGroup{}
 	for i := 0; i < o.concurrent; i++ {
-		wg.Wrap(
+		wg.Go(
 			func() {
 				for idx := range idxCh {
 					select {

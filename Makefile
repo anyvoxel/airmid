@@ -113,6 +113,13 @@ clean:  ##
 	done
 
 
+.PHONY: run
+run: ## Run a command in each Go module directory. Usage: make run cmd="go mod tidy"
+	@for gomod in $(GOMODS); do \
+		(cd $$gomod && echo "==> $$gomod: $(cmd)" && eval "$(cmd)"); \
+	done
+
+
 MOCKGEN := $(BIN_DIR)/mockgen
 .PHONY: mock
 mock: $(MOCKGEN)  ## 

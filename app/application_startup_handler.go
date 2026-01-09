@@ -29,11 +29,11 @@ type ApplicationStartupHandler interface {
 	Name() string
 
 	// BeforeLoadProps is invoked before any props（env、flag、configfile）is retrieved.
-	BeforeLoadProps(ctx context.Context, app *airmidApplication, opt *option) error
+	BeforeLoadProps(ctx context.Context, app *airmidApplication, opt *appOption) error
 
 	// AfterLoadProps is invoked after all props has retrieved.
-	AfterLoadProps(ctx context.Context, app *airmidApplication, opt *option) error
+	AfterLoadProps(ctx context.Context, app *airmidApplication, opt *appOption) error
 
 	// BeforeStartRunner is invoked before AppRunner starting.
-	BeforeStartRunner(ctx context.Context, app *airmidApplication, opt *option) error
+	BeforeStartRunner(ctx context.Context, app *airmidApplication, opt *appOption) error
 }

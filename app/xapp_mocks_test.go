@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	anvil "github.com/anyvoxel/airmid/anvil"
 	ioc "github.com/anyvoxel/airmid/ioc"
 	props "github.com/anyvoxel/airmid/ioc/props"
 	gomock "go.uber.org/mock/gomock"
@@ -214,7 +215,7 @@ func (mr *MockApplicationMockRecorder) ResolveBeanNames(ctx, typ any) *gomock.Ca
 }
 
 // Run mocks base method.
-func (m *MockApplication) Run(ctx context.Context, opts ...Option) error {
+func (m *MockApplication) Run(ctx context.Context, opts ...anvil.Option[appOption]) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
