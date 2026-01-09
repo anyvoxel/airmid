@@ -20,21 +20,12 @@
 package ioc
 
 import (
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
 // BeanDefinitionOption is the configuration helper for build bean definition.
-type BeanDefinitionOption interface {
-	Apply(*beanDefinitionOption)
-}
-
-type fnBeanDefinitionOption struct {
-	fn func(*beanDefinitionOption)
-}
-
-func (f *fnBeanDefinitionOption) Apply(opt *beanDefinitionOption) {
-	f.fn(opt)
-}
+type BeanDefinitionOption = anvil.Option[beanDefinitionOption]
 
 type beanDefinitionOption struct {
 	name    string
@@ -46,46 +37,38 @@ type beanDefinitionOption struct {
 }
 
 // WithBeanName will set the bean definition name.
-type WithBeanName string
-
-// Apply will apply the name to bean definition.
-func (w WithBeanName) Apply(opt *beanDefinitionOption) {
-	opt.name = string(w)
+func WithBeanName(name string) BeanDefinitionOption {
+	return anvil.NewFnOption(func(opt *beanDefinitionOption) {
+		opt.name = name
+	})
 }
 
 // WithBeanScope will set the bean scope.
-type WithBeanScope string
-
-// Apply will apply the scope to bean definition.
-func (w WithBeanScope) Apply(opt *beanDefinitionOption) {
-	opt.scope = string(w)
+func WithBeanScope(scope string) BeanDefinitionOption {
+	return anvil.NewFnOption(func(opt *beanDefinitionOption) {
+		opt.scope = scope
+	})
 }
 
 // WithLazyMode will set the bean lazy mode.
 func WithLazyMode() BeanDefinitionOption {
-	return &fnBeanDefinitionOption{
-		fn: func(opt *beanDefinitionOption) {
-			opt.lazy = true
-		},
-	}
+	return anvil.NewFnOption(func(opt *beanDefinitionOption) {
+		opt.lazy = true
+	})
 }
 
 // WithPrimary will set the bean primary true.
 func WithPrimary() BeanDefinitionOption {
-	return &fnBeanDefinitionOption{
-		fn: func(opt *beanDefinitionOption) {
-			opt.primary = true
-		},
-	}
+	return anvil.NewFnOption(func(opt *beanDefinitionOption) {
+		opt.primary = true
+	})
 }
 
 // WithConstructorArguments will set the constructor arguments.
 func WithConstructorArguments(args []ConstructorArgument) BeanDefinitionOption {
-	return &fnBeanDefinitionOption{
-		fn: func(opt *beanDefinitionOption) {
-			opt.construtorArguments = args
-		},
-	}
+	return anvil.NewFnOption(func(opt *beanDefinitionOption) {
+		opt.construtorArguments = args
+	})
 }
 
 func (o *beanDefinitionOption) Validate() error {

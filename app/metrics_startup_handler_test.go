@@ -51,7 +51,7 @@ func TestConvertOptionToAttributes(t *testing.T) {
 
 	t.Run("normal test", func(t *testing.T) {
 		g := NewWithT(t)
-		opt := &option{
+		opt := &appOption{
 			attrs: []Attribute{
 				{
 					Key:   "k1",
@@ -74,7 +74,7 @@ func TestMetricsStartupHandlerBeforeStartRunner(t *testing.T) {
 	t.Run("should return nil", func(t *testing.T) {
 		g := NewWithT(t)
 		m := &metricsStartupHandler{}
-		g.Expect(m.BeforeStartRunner(context.Background(), nil, &option{
+		g.Expect(m.BeforeStartRunner(context.Background(), nil, &appOption{
 			attrs: []Attribute{
 				{
 					Key:   "k1",

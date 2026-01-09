@@ -25,7 +25,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 )
 
 func TestValueRegexpMatch(t *testing.T) {
@@ -82,7 +82,7 @@ func TestNewFieldDescriptor(t *testing.T) {
 				Unexported: true,
 				Property: &PropertyFieldDescriptor{
 					Name:    "v1",
-					Default: pointer.StringPtr("d1"),
+					Default: anvil.Ptr("d1"),
 				},
 			},
 		},
@@ -249,7 +249,7 @@ func TestNewPropertyFieldDescriptor(t *testing.T) {
 			value: "${b1:=1}",
 			expect: &PropertyFieldDescriptor{
 				Name:    "b1",
-				Default: pointer.StringPtr("1"),
+				Default: anvil.Ptr("1"),
 			},
 			err: "",
 		},

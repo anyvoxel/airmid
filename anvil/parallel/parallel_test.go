@@ -27,6 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
@@ -35,7 +36,7 @@ func TestRun(t *testing.T) {
 		desp     string
 		count    int
 		workFunc func(int) error
-		opts     []Option
+		opts     []anvil.Option[parallelOption]
 		err      string
 	}
 	testCases := []testCase{
@@ -51,7 +52,7 @@ func TestRun(t *testing.T) {
 			workFunc: func(_ int) error {
 				return nil
 			},
-			opts: []Option{
+			opts: []anvil.Option[parallelOption]{
 				WithConcurrent(2),
 			},
 			err: "",
@@ -65,7 +66,7 @@ func TestRun(t *testing.T) {
 				}
 				return nil
 			},
-			opts: []Option{
+			opts: []anvil.Option[parallelOption]{
 				WithConcurrent(4),
 			},
 			err: "Continue",

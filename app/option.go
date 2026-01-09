@@ -19,22 +19,13 @@
 
 package app
 
-// Option applies a configuration option value to a application.
-type Option interface {
-	apply(*option)
-}
+import (
+	"github.com/anyvoxel/airmid/anvil"
+)
 
-// option contains configuration options for a application.
-type option struct {
+// appOption contains configuration options for a application.
+type appOption struct {
 	attrs []Attribute
-}
-
-// optionFunc applies a set of options to a option.
-type optionFunc func(*option)
-
-// apply the function with a option.
-func (f optionFunc) apply(o *option) {
-	f(o)
 }
 
 // Attribute holds a key and value pair.
@@ -44,17 +35,16 @@ type Attribute struct {
 }
 
 // WithAttributes sets the attrs.
-func WithAttributes(attrs ...Attribute) Option {
-	return optionFunc(func(o *option) {
+func WithAttributes(attrs ...Attribute) anvil.Option[appOption] {
+	return anvil.NewFnOption(func(o *appOption) {
 		o.attrs = append(o.attrs, attrs...)
 	})
 }
 
-func newOption(options []Option) *option {
-	o := &option{}
+func newOption(options []anvil.Option[appOption]) *appOption {
+	o := &appOption{}
 	for _, opt := range options {
-		opt.apply(o)
+		opt.Apply(o)
 	}
-
 	return o
 }

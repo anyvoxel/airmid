@@ -22,13 +22,12 @@ package parallel
 import (
 	"runtime"
 
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
-// Option is the configuration helper for parallel.
-type Option = func(*option)
-
-type option struct {
+// parallelOption contains configuration options for parallel.
+type parallelOption struct {
 	// concurrent is the parallelism of parallel
 	concurrent int
 
@@ -36,15 +35,15 @@ type option struct {
 	count int
 }
 
-func defaultOption() *option {
-	return &option{
+func defaultOption() *parallelOption {
+	return &parallelOption{
 		concurrent: runtime.NumCPU(),
 		count:      0,
 	}
 }
 
 // Complete will validate the option and correct it.
-func (o *option) Complete() error {
+func (o *parallelOption) Complete() error {
 	if o.count <= 0 {
 		return xerrors.Errorf("option.Complete: count '%d' must greater than zero", o.count)
 	}
@@ -61,8 +60,8 @@ func (o *option) Complete() error {
 }
 
 // WithConcurrent set the concurrent of parallel.
-func WithConcurrent(v int) Option {
-	return func(o *option) {
+func WithConcurrent(v int) anvil.Option[parallelOption] {
+	return anvil.NewFnOption(func(o *parallelOption) {
 		o.concurrent = v
-	}
+	})
 }

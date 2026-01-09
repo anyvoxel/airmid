@@ -29,7 +29,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
@@ -96,7 +96,7 @@ func TestBeanFactoryGetBean(t *testing.T) {
 			err:      "",
 			expect: &testBeanOnlyPropertyField{
 				F0: 100,
-				f1: pointer.IntPtr(int(200)),
+				f1: anvil.Ptr(int(200)),
 				F2: []int{1, 2},
 				f3: []int{1, 3, 2},
 			},
@@ -121,21 +121,21 @@ func TestBeanFactoryGetBean(t *testing.T) {
 			expect: &testBeanOnlyBeanField{
 				F0: &testBeanOnlyPropertyField{
 					F0: 100,
-					f1: pointer.IntPtr(int(200)),
+					f1: anvil.Ptr(int(200)),
 					F2: []int{1, 2},
 					f3: []int{1, 3, 2},
 				},
 				f1: []fmt.Stringer{
 					&testBeanOnlyPropertyField{
 						F0: 100,
-						f1: pointer.IntPtr(int(200)),
+						f1: anvil.Ptr(int(200)),
 						F2: []int{1, 2},
 						f3: []int{1, 3, 2},
 					},
 				},
 				F2: &testBeanOnlyPropertyField{
 					F0: 100,
-					f1: pointer.IntPtr(int(200)),
+					f1: anvil.Ptr(int(200)),
 					F2: []int{1, 2},
 					f3: []int{1, 3, 2},
 				},
@@ -174,7 +174,7 @@ func TestBeanFactoryGetBean(t *testing.T) {
 			expect: &testBeanMixField{
 				F0: &testBeanOnlyPropertyField{
 					F0: 100,
-					f1: pointer.IntPtr(int(200)),
+					f1: anvil.Ptr(int(200)),
 					F2: []int{1, 2},
 					f3: []int{1, 3, 2},
 				},
@@ -494,7 +494,7 @@ func TestRegisterSingleton(t *testing.T) {
 func TestGetBeanFromRegisterSingleton(t *testing.T) {
 	g := NewWithT(t)
 	bf := NewBeanFactory()
-	bean1 := pointer.StringPtr("1")
+	bean1 := anvil.Ptr("1")
 	bf.RegisterSingleton("bean1", bean1)
 
 	obj1, err := bf.GetBean(context.Background(), "bean1")
@@ -504,7 +504,7 @@ func TestGetBeanFromRegisterSingleton(t *testing.T) {
 	g.Expect(reflect.ValueOf(beanGet1).Pointer()).To(Equal(reflect.ValueOf(bean1).Pointer()))
 
 	*bean1 = "2"
-	g.Expect(beanGet1).To(Equal(pointer.StringPtr("2")))
+	g.Expect(beanGet1).To(Equal(anvil.Ptr("2")))
 }
 
 type testAware struct {

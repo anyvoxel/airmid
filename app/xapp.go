@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/ioc"
 	"github.com/anyvoxel/airmid/ioc/props"
@@ -41,7 +42,7 @@ type Application interface {
 	// 3. initialize application's component, such as gopool、logger、metrics
 	// 4. start all AppRunner
 	// 5. Waiting for shutdown signals
-	Run(ctx context.Context, opts ...Option) error
+	Run(ctx context.Context, opts ...anvil.Option[appOption]) error
 
 	// Shutdown will stop the application, the application will start graceful shutdown progress:
 	// 1. invoke all AppRunner
@@ -131,7 +132,7 @@ func (a *airmidApplication) registerAppBeanDefinitions() error {
 	return nil
 }
 
-func (a *airmidApplication) runBeforeLoadProps(ctx context.Context, opt *option) error {
+func (a *airmidApplication) runBeforeLoadProps(ctx context.Context, opt *appOption) error {
 	for _, h := range a.startupHandlers {
 		err := h.BeforeLoadProps(ctx, a, opt)
 		if err != nil {
@@ -142,7 +143,7 @@ func (a *airmidApplication) runBeforeLoadProps(ctx context.Context, opt *option)
 	return nil
 }
 
-func (a *airmidApplication) runAfterLoadProps(ctx context.Context, opt *option) error {
+func (a *airmidApplication) runAfterLoadProps(ctx context.Context, opt *appOption) error {
 	for _, h := range a.startupHandlers {
 		err := h.AfterLoadProps(ctx, a, opt)
 		if err != nil {
@@ -153,7 +154,7 @@ func (a *airmidApplication) runAfterLoadProps(ctx context.Context, opt *option) 
 	return nil
 }
 
-func (a *airmidApplication) runBeforeStartRunner(ctx context.Context, opt *option) error {
+func (a *airmidApplication) runBeforeStartRunner(ctx context.Context, opt *appOption) error {
 	for _, h := range a.startupHandlers {
 		err := h.BeforeStartRunner(ctx, a, opt)
 		if err != nil {
@@ -189,7 +190,7 @@ func (a *airmidApplication) loadProperties(ctx context.Context) (err error) {
 	return a.loadPropsFromEnvAndFlags(ctx, a)
 }
 
-func (a *airmidApplication) Run(ctx context.Context, opts ...Option) (err error) {
+func (a *airmidApplication) Run(ctx context.Context, opts ...anvil.Option[appOption]) (err error) {
 	opt := newOption(opts)
 
 	err = a.runBeforeLoadProps(ctx, opt)

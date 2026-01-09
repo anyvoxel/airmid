@@ -57,7 +57,7 @@ func (*metricsStartupHandler) Name() string {
 	return "MetricsStartupHandler"
 }
 
-func (m *metricsStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplication, _ *option) error {
+func (m *metricsStartupHandler) BeforeLoadProps(_ context.Context, app *airmidApplication, _ *appOption) error {
 	m.startupTime = time.Now()
 
 	beanDefinitions := map[string]ioc.BeanDefinition{
@@ -77,7 +77,7 @@ func (m *metricsStartupHandler) BeforeLoadProps(_ context.Context, app *airmidAp
 	return nil
 }
 
-func (*metricsStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApplication, _ *option) error {
+func (*metricsStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApplication, _ *appOption) error {
 	metricsC, err := ioc.GetBean[*metricsStartupHandlerConfiguration](ctx, app, "airmid.metrics.startup.config")
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func (*metricsStartupHandler) AfterLoadProps(ctx context.Context, app *airmidApp
 	return nil
 }
 
-func convertOptionToAttributes(opt *option) []attribute.KeyValue {
+func convertOptionToAttributes(opt *appOption) []attribute.KeyValue {
 	v := make([]attribute.KeyValue, 0)
 
 	if opt == nil {
@@ -107,7 +107,7 @@ func convertOptionToAttributes(opt *option) []attribute.KeyValue {
 	return v
 }
 
-func (m *metricsStartupHandler) BeforeStartRunner(ctx context.Context, _ *airmidApplication, opt *option) error {
+func (m *metricsStartupHandler) BeforeStartRunner(ctx context.Context, _ *airmidApplication, opt *appOption) error {
 	startTime, err := otel.Meter(
 		anvil.AirmidPackageName,
 		api.WithInstrumentationVersion(anvil.AirmidPackageVersion),

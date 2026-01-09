@@ -23,13 +23,12 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/anyvoxel/airmid/anvil"
 )
 
 func TestShutdownWithSignal(t *testing.T) {
@@ -85,9 +84,9 @@ func TestShutdownMixed(t *testing.T) {
 		},
 	})
 
-	var wg anvil.WaitGroupWrapper
+	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
-		wg.Wrap(func() {
+		wg.Go(func() {
 			m.Shutdown("1")
 		})
 	}

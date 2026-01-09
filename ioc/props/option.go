@@ -22,15 +22,13 @@ package props
 import (
 	"reflect"
 
-	"github.com/anyvoxel/airmid/anvil/pointer"
+	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 	"github.com/anyvoxel/airmid/anvil/xreflect"
 )
 
 // GetOption is the configuration helper for get properties.
-type GetOption interface {
-	Apply(*getOption)
-}
+type GetOption = anvil.Option[getOption]
 
 type getOption struct {
 	// Target is the value to store the properties, If the user
@@ -100,36 +98,23 @@ func (o *getOption) IsTargetValid() bool {
 }
 
 // WithDefault will set the default option.
-type WithDefault string
-
-// Apply will apply the default value to get.
-func (w WithDefault) Apply(opt *getOption) {
-	opt.Default = pointer.StringPtr(string(w))
-}
-
-type fnGetOption struct {
-	fn func(*getOption)
-}
-
-func (f *fnGetOption) Apply(opt *getOption) {
-	f.fn(opt)
+func WithDefault(s string) GetOption {
+	return anvil.NewFnOption(func(opt *getOption) {
+		opt.Default = &s
+	})
 }
 
 // WithTarget will set the target option.
 func WithTarget(i any) GetOption {
-	return &fnGetOption{
-		fn: func(opt *getOption) {
-			opt.Target = xreflect.IndirectToValue(i)
-			opt.Typ = opt.Target.Type()
-		},
-	}
+	return anvil.NewFnOption(func(opt *getOption) {
+		opt.Target = xreflect.IndirectToValue(i)
+		opt.Typ = opt.Target.Type()
+	})
 }
 
 // WithType will set the target type option.
 func WithType(typ reflect.Type) GetOption {
-	return &fnGetOption{
-		fn: func(opt *getOption) {
-			opt.Typ = typ
-		},
-	}
+	return anvil.NewFnOption(func(opt *getOption) {
+		opt.Typ = typ
+	})
 }
