@@ -42,7 +42,7 @@ func (t *testMethodConstructorStruct) F1() int {
 }
 
 func (t *testMethodConstructorStruct) F2WithError() (int, error) {
-	return 2, xerrors.ErrContinue
+	return 2, xerrors.NewTyped(xerrors.Continue{}).WithMessage("Continue")
 }
 
 func (t *testMethodConstructorStruct) F2WithNilError() (int, error) {
@@ -93,7 +93,7 @@ func TestMethodConstructor(t *testing.T) {
 					return nil, nil
 				},
 			},
-			err:    "Continue",
+			err:    "^Continue: Continue$",
 			expect: 2,
 		},
 		{

@@ -42,7 +42,7 @@ func TestLocalResourceLocatorLocate(t *testing.T) {
 		}
 
 		guard := gomonkey.ApplyFunc(filepath.Abs, func(string) (string, error) {
-			return "", xerrors.ErrContinue
+			return "", xerrors.NewTyped(xerrors.Continue{})
 		})
 		defer guard.Reset()
 
@@ -82,7 +82,7 @@ func TestLocalResourceLocatorLocate(t *testing.T) {
 		}
 
 		guard := gomonkey.ApplyFunc(os.Open, func(string) (*os.File, error) {
-			return nil, xerrors.ErrContinue
+			return nil, xerrors.NewTyped(xerrors.Continue{})
 		})
 		defer guard.Reset()
 

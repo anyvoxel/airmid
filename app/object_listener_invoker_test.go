@@ -96,6 +96,7 @@ func TestNewObjectListenerInvoker(t *testing.T) {
 	vobj, err = NewObjectListenerInvoker(t, app)
 	g.Expect(err).To(HaveOccurred())
 	g.Expect(vobj).To(BeNil())
-	g.Expect(xerrors.IsContinue(err)).To(BeTrue())
-	g.Expect(err.Error()).To(MatchRegexp(`type '\*testing\.T' of object doesn't implement Listener: Continue`))
+	var continueErr *xerrors.TypedError[xerrors.Continue]
+	g.Expect(xerrors.As(err, &continueErr)).To(BeTrue())
+	g.Expect(err.Error()).To(MatchRegexp(`^Continue: type '\*testing\.T' of object doesn't implement Listener$`))
 }

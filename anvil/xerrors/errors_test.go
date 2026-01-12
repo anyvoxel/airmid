@@ -21,139 +21,150 @@ package xerrors
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/onsi/gomega"
 )
 
-func TestErrNotFound(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapNotFound("normal")
+type MyCustomError struct{ Msg string }
+
+func (e *MyCustomError) Error() string { return e.Msg }
+
+func TestTypedError(t *testing.T) {
+	g := gomega.NewWithT(t)
+
+	t.Run("CreationAndWrapping", func(t *testing.T) {
+		cause := errors.New("underlying cause")
+		err := NewTyped(NotFound{}).WithCause(cause).WithMessage("resource not found")
+
 		g.Expect(err).To(gomega.HaveOccurred())
-
-		g.Expect(IsNotFound(err)).To(gomega.BeTrue())
+		g.Expect(err.Message).To(gomega.Equal("resource not found"))
+		g.Expect(Is(err, cause)).To(gomega.BeTrue())
+		g.Expect(err.Error()).To(gomega.Equal("NotFound: resource not found (cause: underlying cause)"))
 	})
 
-	t.Run("is_not_found_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsNotFound(nil)).To(gomega.BeFalse())
+	t.Run("AsSuccess", func(t *testing.T) {
+		err := NewTyped(NotFound{}).WithMessage("test")
+		var notFoundErr *TypedError[NotFound]
+		g.Expect(As(err, &notFoundErr)).To(gomega.BeTrue())
+		g.Expect(notFoundErr).NotTo(gomega.BeNil())
 	})
 
-	t.Run("is_not_found_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsNotFound(errors.New("other"))).To(gomega.BeFalse())
-	})
-}
-
-func TestErrDuplicate(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapDuplicate("normal")
-		g.Expect(err).To(gomega.HaveOccurred())
-
-		g.Expect(IsDuplicate(err)).To(gomega.BeTrue())
+	t.Run("AsFailureForDifferentTypedError", func(t *testing.T) {
+		err := NewTyped(NotFound{}).WithMessage("test")
+		var duplicateErr *TypedError[Duplicate]
+		g.Expect(As(err, &duplicateErr)).To(gomega.BeFalse())
+		g.Expect(duplicateErr).To(gomega.BeNil())
 	})
 
-	t.Run("is_duplidate_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsDuplicate(nil)).To(gomega.BeFalse())
+	t.Run("AsFailureForNil", func(t *testing.T) {
+		var notFoundErr *TypedError[NotFound]
+		g.Expect(As(nil, &notFoundErr)).To(gomega.BeFalse())
 	})
 
-	t.Run("is_duplidate_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsDuplicate(errors.New("other"))).To(gomega.BeFalse())
-	})
-}
-
-func TestErrNotImplement(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapNotImplement("normal")
-		g.Expect(err).To(gomega.HaveOccurred())
-
-		g.Expect(IsNotImplement(err)).To(gomega.BeTrue())
+	t.Run("AsFailureForOtherError", func(t *testing.T) {
+		err := errors.New("some other error")
+		var notFoundErr *TypedError[NotFound]
+		g.Expect(As(err, &notFoundErr)).To(gomega.BeFalse())
 	})
 
-	t.Run("is_not_implement_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
+	t.Run("TableDrivenForSemanticTypes", func(t *testing.T) {
+		testCases := []struct {
+			name      string
+			err       error
+			checkFunc func(err error) bool
+		}{
+			{
+				name: "NotImplement",
+				err:  NewTyped(NotImplement{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[NotImplement]
+					return As(err, &target)
+				},
+			},
+			{
+				name: "NotFound",
+				err:  NewTyped(NotFound{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[NotFound]
+					return As(err, &target)
+				},
+			},
+			{
+				name: "Duplicate",
+				err:  NewTyped(Duplicate{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[Duplicate]
+					return As(err, &target)
+				},
+			},
+			{
+				name: "Continue",
+				err:  NewTyped(Continue{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[Continue]
+					return As(err, &target)
+				},
+			},
+			{
+				name: "Retryable",
+				err:  NewTyped(Retryable{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[Retryable]
+					return As(err, &target)
+				},
+			},
+			{
+				name: "NonRetryable",
+				err:  NewTyped(NonRetryable{}),
+				checkFunc: func(err error) bool {
+					var target *TypedError[NonRetryable]
+					return As(err, &target)
+				},
+			},
+		}
 
-		g.Expect(IsNotImplement(nil)).To(gomega.BeFalse())
+		for _, tc := range testCases {
+			t.Run(fmt.Sprintf("PositiveCheck_%s", tc.name), func(t *testing.T) {
+				g := gomega.NewWithT(t)
+				g.Expect(tc.checkFunc(tc.err)).To(gomega.BeTrue())
+			})
+			t.Run(fmt.Sprintf("NegativeCheck_%s", tc.name), func(t *testing.T) {
+				g := gomega.NewWithT(t)
+				g.Expect(tc.checkFunc(errors.New("different error"))).To(gomega.BeFalse())
+			})
+		}
 	})
 
-	t.Run("is_not_implement_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
+	t.Run("AsType", func(t *testing.T) {
+		err := NewTyped(NotFound{}).WithMessage("test")
 
-		g.Expect(IsNotImplement(errors.New("other"))).To(gomega.BeFalse())
-	})
-}
+		// Successful match - getting *TypedError[NotFound]
+		typedNotFoundErr, ok := AsType[*TypedError[NotFound]](err)
+		g.Expect(ok).To(gomega.BeTrue())
+		g.Expect(typedNotFoundErr).NotTo(gomega.BeNil())
+		g.Expect(typedNotFoundErr.Context).To(gomega.Equal(NotFound{})) // Check the context
+		g.Expect(typedNotFoundErr.Message).To(gomega.Equal("test"))     // Check the message
 
-func TestErrContinue(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapContinue("normal")
-		g.Expect(err).To(gomega.HaveOccurred())
+		// Failed match - getting *TypedError[Duplicate]
+		typedDuplicateErr, ok := AsType[*TypedError[Duplicate]](err)
+		g.Expect(ok).To(gomega.BeFalse())
+		g.Expect(typedDuplicateErr).To(gomega.BeNil())
 
-		g.Expect(IsContinue(err)).To(gomega.BeTrue())
-	})
+		// Test with an error chain involving a custom error
+		customWrappedErr := NewTyped(InvalidArgument{}).WithCause(&MyCustomError{Msg: "specific custom error"})
 
-	t.Run("is_continue_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
+		// Successfully extract MyCustomError
+		myCustomErr, ok := AsType[*MyCustomError](customWrappedErr)
+		g.Expect(ok).To(gomega.BeTrue())
+		g.Expect(myCustomErr).NotTo(gomega.BeNil())
+		g.Expect(myCustomErr.Msg).To(gomega.Equal("specific custom error"))
 
-		g.Expect(IsContinue(nil)).To(gomega.BeFalse())
-	})
-
-	t.Run("is_continue_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsContinue(errors.New("other"))).To(gomega.BeFalse())
-	})
-}
-
-func TestErrRetryable(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapRetryable("normal")
-		g.Expect(err).To(gomega.HaveOccurred())
-
-		g.Expect(IsRetryable(err)).To(gomega.BeTrue())
-	})
-
-	t.Run("is_retryable_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsRetryable(nil)).To(gomega.BeFalse())
-	})
-
-	t.Run("is_retryable_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsRetryable(errors.New("other"))).To(gomega.BeFalse())
-	})
-}
-
-func TestErrNonRetryable(t *testing.T) {
-	t.Run("normal test", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-		err := WrapNonRetryable("normal")
-		g.Expect(err).To(gomega.HaveOccurred())
-
-		g.Expect(IsNonRetryable(err)).To(gomega.BeTrue())
-	})
-
-	t.Run("is_non_retryable_with_nil", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsNonRetryable(nil)).To(gomega.BeFalse())
-	})
-
-	t.Run("is_non_retryable_with_other", func(t *testing.T) {
-		g := gomega.NewWithT(t)
-
-		g.Expect(IsNonRetryable(errors.New("other"))).To(gomega.BeFalse())
+		// Failed to extract MyCustomError from a different error
+		otherErr := errors.New("just another error")
+		otherMyCustomErr, ok := AsType[*MyCustomError](otherErr)
+		g.Expect(ok).To(gomega.BeFalse())
+		g.Expect(otherMyCustomErr).To(gomega.BeNil())
 	})
 }

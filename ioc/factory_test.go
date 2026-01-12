@@ -188,7 +188,7 @@ func TestBeanFactoryGetBean(t *testing.T) {
 				g.Expect(err).ToNot(HaveOccurred())
 			},
 			beanName: "beanNotImplement",
-			err:      "No candidate found for field 'notImplementInterface' with type ioc.testNotImplementInterface",
+			err:      `^NoCandidateError: no candidate found for field 'notImplementInterface' with type ioc.testNotImplementInterface$`,
 		},
 	}
 
@@ -219,7 +219,7 @@ type testSingletonBean struct {
 func (b *testSingletonBean) AfterPropertiesSet() error {
 	b.count++
 	if b.count > 1 {
-		return xerrors.Errorf("Too many instance with singleton scope object")
+		return xerrors.NewTyped(xerrors.TooManyInstancesError{})
 	}
 	return nil
 }
@@ -405,7 +405,7 @@ func TestRegisterScope(t *testing.T) {
 			scope: &testScope{
 				name: "s2",
 			},
-			err: "Invalid scope name 'singleton'",
+			err: "InvalidScopeError: invalid scope name 'singleton': cannot replace existing scopes 'prototype' and 'singleton'",
 		},
 		{
 			desp: "prototype error",
@@ -421,7 +421,7 @@ func TestRegisterScope(t *testing.T) {
 			scope: &testScope{
 				name: "s2",
 			},
-			err: "Invalid scope name 'prototype'",
+			err: "InvalidScopeError: invalid scope name 'prototype': cannot replace existing scopes 'prototype' and 'singleton'",
 		},
 	}
 	for _, tc := range testCases {
@@ -470,7 +470,7 @@ func TestRegisterSingleton(t *testing.T) {
 			},
 			name: "s1",
 			bean: "bean1",
-			err:  "Invalid object 'bean1' under bean name 's1'",
+			err:  "InvalidBeanDefinitionError: invalid bean definition for bean 's1': object 'bean1' already exists with object 'bean1'",
 		},
 	}
 	for _, tc := range testCases {
@@ -645,7 +645,7 @@ func TestPreInstantiateSingletonsWithMoreBeans(t *testing.T) {
 		}
 		err := br.PreInstantiateSingletons(context.Background())
 		g.Expect(err).To(HaveOccurred())
-		g.Expect(err.Error()).To(MatchRegexp(`property with key='props.1' not found`))
+		g.Expect(err.Error()).To(MatchRegexp(`NotFound: property with ID 'props.1' not found`))
 	})
 }
 
@@ -721,7 +721,7 @@ func TestAutowireCircularly_prototype(t *testing.T) {
 
 	_, err = br.GetBean(context.Background(), "BeanA")
 	g.Expect(err).Should(HaveOccurred())
-	g.Expect(err.Error()).Should(Equal("cannot get bean 'BeanA' circularly"))
+	g.Expect(err.Error()).Should(Equal("CircularDependency: cannot get bean 'BeanA' circularly"))
 }
 
 func TestGetBeanConcurrently_singleton(t *testing.T) {
@@ -773,7 +773,7 @@ func TestGetBeanConcurrently_prototype(t *testing.T) {
 			res, err := br.GetBean(context.Background(), "BeanA")
 			g.Expect(res).To(BeNil())
 			g.Expect(err).Should(HaveOccurred())
-			g.Expect(err.Error()).Should(Equal("cannot get bean 'BeanA' circularly"))
+			g.Expect(err.Error()).Should(Equal("CircularDependency: cannot get bean 'BeanA' circularly"))
 			wg.Done()
 		}()
 	}
@@ -856,7 +856,7 @@ func TestAutowireMultipleCandidatesWithMultiplePrimary(t *testing.T) {
 	bf.RegisterBeanDefinition("test-impl2", MustNewBeanDefinition(reflect.TypeOf((*impl2)(nil)), WithPrimary()))
 	_, err := bf.GetBean(context.Background(), "test-bean")
 	g.Expect(err).Should(HaveOccurred())
-	g.Expect(err.Error()).To(Equal("'2' primary candidates found for field 'test' with type ioc.testInterface"))
+	g.Expect(err.Error()).To(Equal("TooManyCandidatesError: '2' primary candidates found for field 'test' with type ioc.testInterface"))
 }
 
 func TestAutowireMultipleCandidatesWithNotImplementInterfaceLazyLoadBean(t *testing.T) {
@@ -867,5 +867,5 @@ func TestAutowireMultipleCandidatesWithNotImplementInterfaceLazyLoadBean(t *test
 	bf.RegisterBeanDefinition("test-impl3", MustNewBeanDefinition(reflect.TypeOf((*impl3)(nil)), WithLazyMode()))
 	_, err := bf.GetBean(context.Background(), "test-bean")
 	g.Expect(err).Should(HaveOccurred())
-	g.Expect(err.Error()).To(Equal("'2' candidates found for field 'test' with type ioc.testInterface"))
+	g.Expect(err.Error()).To(Equal("TooManyCandidatesError: '2' candidates found for field 'test' with type ioc.testInterface"))
 }

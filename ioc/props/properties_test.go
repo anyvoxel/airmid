@@ -28,6 +28,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/anyvoxel/airmid/anvil"
+	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
 func TestSet(t *testing.T) {
@@ -217,19 +218,19 @@ func TestSet(t *testing.T) {
 			desp:  "set value for struct failed",
 			key:   "k1",
 			value: testCase{},
-			err:   "Cannot convert value for key 'k1' to string",
+			err:   "ConversionError",
 		},
 		{
 			desp:  "set value for array struct failed",
 			key:   "k1",
 			value: [1]testCase{{}},
-			err:   `Cannot set val for array/slice index's key 'k1\[0\]'`,
+			err:   `SettingError`,
 		},
 		{
 			desp:  "set value for slice struct failed",
 			key:   "k1",
 			value: []testCase{{}},
-			err:   `Cannot set val for array/slice index's key 'k1\[0\]'`,
+			err:   `SettingError`,
 		},
 		{
 			desp: "set value for map struct failed",
@@ -237,7 +238,7 @@ func TestSet(t *testing.T) {
 			value: map[string]testCase{
 				"k1": {},
 			},
-			err: "Cannot set val for map's key 'k1.k1'",
+			err: "SettingError",
 		},
 		{
 			desp: "set value for map key struct failed",
@@ -245,7 +246,7 @@ func TestSet(t *testing.T) {
 			value: map[*testCase]string{
 				{}: "",
 			},
-			err: "Cannot convert map's key",
+			err: "ConversionError",
 		},
 	}
 
@@ -256,13 +257,39 @@ func TestSet(t *testing.T) {
 			err := p.Set(context.Background(), tc.key, tc.value)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).Should(MatchRegexp(tc.err))
+				switch tc.err {
+				case "ConversionError":
+					var e *xerrors.TypedError[xerrors.ConversionError]
+					g.Expect(xerrors.As(err, &e)).To(BeTrue())
+				case "SettingError":
+					var e *xerrors.TypedError[xerrors.SettingError]
+					g.Expect(xerrors.As(err, &e)).To(BeTrue())
+				default:
+					g.Expect(err.Error()).Should(MatchRegexp(tc.err))
+				}
 				return
 			}
 
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(map[string]string(p)).To(Equal(tc.expect))
 		})
+	}
+}
+
+func checkGetError(g *WithT, err error, expectedErr string) {
+	g.Expect(err).To(HaveOccurred())
+	switch expectedErr {
+	case "NotFound":
+		var e *xerrors.TypedError[xerrors.NotFound]
+		g.Expect(xerrors.As(err, &e)).To(BeTrue())
+	case "UnsupportedTypeError":
+		var e *xerrors.TypedError[xerrors.UnsupportedTypeError]
+		g.Expect(xerrors.As(err, &e)).To(BeTrue())
+	case "InvalidArgument":
+		var e *xerrors.TypedError[xerrors.InvalidArgument]
+		g.Expect(xerrors.As(err, &e)).To(BeTrue())
+	default:
+		g.Expect(err.Error()).Should(MatchRegexp(expectedErr))
 	}
 }
 
@@ -298,7 +325,7 @@ func TestGet(t *testing.T) {
 				"k1": "v1",
 			}),
 			key:    "k0",
-			err:    "property with key='k0' not found",
+			err:    "NotFound",
 			expect: "",
 		},
 		{
@@ -539,7 +566,7 @@ func TestGet(t *testing.T) {
 			}),
 			key: "k1",
 			typ: reflect.TypeOf(testCase{}),
-			err: "Unsupport target type props.testCase",
+			err: "UnsupportedTypeError",
 		},
 		{
 			desp: "target to struct ptr value",
@@ -687,9 +714,9 @@ func TestGet(t *testing.T) {
 			}
 
 			actual, err := tc.p.Get(context.Background(), tc.key, opts...)
+
 			if tc.err != "" {
-				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(MatchRegexp(tc.err))
+				checkGetError(g, err, tc.err)
 				return
 			}
 
@@ -750,7 +777,7 @@ func TestDoGetSlice(t *testing.T) {
 				"k1[1]": "v2",
 			}),
 			key:    "k2",
-			err:    "property slice with key='k2' not found",
+			err:    `NotFound: property slice with ID 'k2' not found`,
 			expect: []string{},
 		},
 	}

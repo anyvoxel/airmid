@@ -63,7 +63,8 @@ func (p propertiesImpl) Get(ctx context.Context, key string, opts ...GetOption) 
 	case targetValue.Kind() == reflect.Slice:
 		vstrs, err := p.doGetSlice(key)
 		if err != nil {
-			if !xerrors.Is(err, xerrors.ErrNotFound) || opt.Default == nil {
+			var notFoundErr *xerrors.TypedError[xerrors.NotFound]
+			if !xerrors.As(err, &notFoundErr) || opt.Default == nil {
 				return nil, err
 			}
 
@@ -77,7 +78,8 @@ func (p propertiesImpl) Get(ctx context.Context, key string, opts ...GetOption) 
 	default:
 		vstr, err := p.doGet(key)
 		if err != nil {
-			if !xerrors.Is(err, xerrors.ErrNotFound) || opt.Default == nil {
+			var notFoundErr *xerrors.TypedError[xerrors.NotFound]
+			if !xerrors.As(err, &notFoundErr) || opt.Default == nil {
 				return nil, err
 			}
 
@@ -100,7 +102,7 @@ func (p propertiesImpl) doGet(key string) (string, error) {
 		return val, nil
 	}
 
-	return "", xerrors.WrapNotFound("property with key='%v' not found", key)
+	return "", xerrors.NewTyped(xerrors.NotFound{ResourceType: "property", ResourceID: key})
 }
 
 type indexString struct {
@@ -150,7 +152,7 @@ func (p propertiesImpl) doGetSlice(key string) ([]string, error) {
 		return rr, nil
 	}
 
-	return nil, xerrors.WrapNotFound("property slice with key='%v' not found", key)
+	return nil, xerrors.NewTyped(xerrors.NotFound{ResourceType: "property slice", ResourceID: key})
 }
 
 //nolint:revive,exhaustive
@@ -161,14 +163,21 @@ func (p propertiesImpl) Set(ctx context.Context, key string, val any) error {
 		for _, k := range v.MapKeys() {
 			kstr, err := conv.ToString(k.Interface())
 			if err != nil {
-				return xerrors.Wrapf(err, "Cannot convert map's key '%v' to string", k)
+				return xerrors.NewTyped(
+					xerrors.ConversionError{
+						SourceType: fmt.Sprintf("'%T'", k.Interface()),
+						TargetType: "string",
+						Value:      k.Interface(),
+					},
+				).WithCause(err)
 			}
 
 			kstr = fmt.Sprintf("%s.%s", key, kstr)
 			kvalue := v.MapIndex(k).Interface()
 			err = p.Set(ctx, kstr, kvalue)
 			if err != nil {
-				return xerrors.Wrapf(err, "Cannot set val for map's key '%v'", kstr)
+				return xerrors.NewTyped(xerrors.SettingError{Key: kstr, Value: kvalue, Reason: "cannot set value for map's key"}).
+					WithCause(err)
 			}
 		}
 	case reflect.Array, reflect.Slice:
@@ -178,13 +187,17 @@ func (p propertiesImpl) Set(ctx context.Context, key string, val any) error {
 			kvalue := v.Index(i).Interface()
 			err := p.Set(ctx, kstr, kvalue)
 			if err != nil {
-				return xerrors.Wrapf(err, "Cannot set val for array/slice index's key '%v'", kstr)
+				return xerrors.NewTyped(
+					xerrors.SettingError{Key: kstr, Value: kvalue, Reason: "cannot set value for array/slice index's key"},
+				).WithCause(err)
 			}
 		}
 	default:
 		value, err := conv.ToString(val)
 		if err != nil {
-			return xerrors.Wrapf(err, "Cannot convert value for key '%s' to string", key)
+			return xerrors.NewTyped(
+				xerrors.ConversionError{SourceType: fmt.Sprintf("'%T'", val), TargetType: "string", Value: val},
+			).WithCause(err)
 		}
 		p[key] = value
 		slogctx.FromCtx(ctx).DebugContext(

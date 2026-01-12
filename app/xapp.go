@@ -136,7 +136,9 @@ func (a *airmidApplication) runBeforeLoadProps(ctx context.Context, opt *appOpti
 	for _, h := range a.startupHandlers {
 		err := h.BeforeLoadProps(ctx, a, opt)
 		if err != nil {
-			return xerrors.Wrapf(err, "Handler [%s] BeforeLoadProps failed", h.Name())
+			return xerrors.NewTyped(xerrors.StartupHandlerError{HandlerName: h.Name(), Phase: "BeforeLoadProps"}).
+				WithCause(err).
+				WithMessage(fmt.Sprintf("Handler [%s] BeforeLoadProps failed", h.Name()))
 		}
 	}
 
@@ -147,7 +149,9 @@ func (a *airmidApplication) runAfterLoadProps(ctx context.Context, opt *appOptio
 	for _, h := range a.startupHandlers {
 		err := h.AfterLoadProps(ctx, a, opt)
 		if err != nil {
-			return xerrors.Wrapf(err, "Handler [%s] AfterLoadProps failed", h.Name())
+			return xerrors.NewTyped(xerrors.StartupHandlerError{HandlerName: h.Name(), Phase: "AfterLoadProps"}).
+				WithCause(err).
+				WithMessage(fmt.Sprintf("Handler [%s] AfterLoadProps failed", h.Name()))
 		}
 	}
 
@@ -158,7 +162,9 @@ func (a *airmidApplication) runBeforeStartRunner(ctx context.Context, opt *appOp
 	for _, h := range a.startupHandlers {
 		err := h.BeforeStartRunner(ctx, a, opt)
 		if err != nil {
-			return xerrors.Wrapf(err, "Handler [%s] BeforeStartRunner failed", h.Name())
+			return xerrors.NewTyped(xerrors.StartupHandlerError{HandlerName: h.Name(), Phase: "BeforeStartRunner"}).
+				WithCause(err).
+				WithMessage(fmt.Sprintf("Handler [%s] BeforeStartRunner failed", h.Name()))
 		}
 	}
 

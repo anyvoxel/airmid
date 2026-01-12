@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -87,9 +88,14 @@ func (b *DefaultConstructorBuilder) Build(typ reflect.Type, args []ConstructorAr
 	default:
 	}
 
-	return nil, xerrors.Errorf(
-		"Too many function '%d' match the constructor spec with type '%s'",
-		len(methods), typ.String())
+	return nil, xerrors.NewTyped(xerrors.TooManyConstructorsError{Count: len(methods), Type: typ.String()}).
+		WithMessage(
+			fmt.Sprintf(
+				"Too many function '%d' match the constructor spec with type '%s'",
+				len(methods),
+				typ.String(),
+			),
+		)
 }
 
 // MethodNameFilter will check the method name.

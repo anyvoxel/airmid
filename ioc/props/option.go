@@ -20,6 +20,7 @@
 package props
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/anyvoxel/airmid/anvil"
@@ -55,13 +56,19 @@ func defaultGetOption() *getOption {
 
 func (o *getOption) Validate() error {
 	if o.Typ == nil {
-		return xerrors.Errorf("GetOption.Validate: typ cannot be nil, default to string, did the user override it?")
+		return xerrors.NewTyped(xerrors.InvalidArgument{
+			ArgumentName: "typ",
+			Reason:       "cannot be nil, default to string, did the user override it?",
+		})
 	}
 
 	if o.IsTargetValid() {
 		if o.Target.Type() != o.Typ {
-			return xerrors.Errorf(
-				"GetOption.Validate: target('%T') doesn't match typ('%v')", o.Target.Interface(), o.Typ.String())
+			return xerrors.NewTyped(xerrors.InvalidArgument{
+				ArgumentName: "target",
+				Reason: fmt.Sprintf("type mismatch, target('%T') doesn't match typ('%v')",
+					o.Target.Interface(), o.Typ.String()),
+			})
 		}
 	}
 

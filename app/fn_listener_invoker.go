@@ -21,6 +21,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -76,29 +77,35 @@ func NewFnListenerInvoker(fn reflect.Value, name string, app Application) (Liste
 	typ := fn.Type()
 
 	if typ.Kind() != reflect.Func {
-		return nil, xerrors.WrapContinue("type '%s' of object '%s' doesn't match kind func", typ.String(), name)
+		return nil, xerrors.NewTyped(xerrors.Continue{}).
+			WithMessage(fmt.Sprintf("type '%s' of object '%s' doesn't match kind func", typ.String(), name))
 	}
 
 	if typ.NumIn() != 2 || typ.NumOut() != 0 {
-		return nil, xerrors.WrapContinue(
-			"func '%s' expect in '%d' and out '%d', got in '%d' and out '%d'", name, 2, 0, typ.NumIn(), typ.NumOut(),
-		)
+		return nil, xerrors.NewTyped(xerrors.Continue{}).
+			WithMessage(
+				fmt.Sprintf(
+					"func '%s' expect in '%d' and out '%d', got in '%d' and out '%d'",
+					name, 2, 0, typ.NumIn(), typ.NumOut(),
+				),
+			)
 	}
 
 	arg0 := typ.In(0)
 	arg1 := typ.In(1)
 	if arg0 != xreflect.ContextType {
-		return nil, xerrors.WrapContinue(
-			"func '%s' arg0 type '%s', expect 'context.Context'", name, arg0.String())
+		return nil, xerrors.NewTyped(xerrors.Continue{}).
+			WithMessage(fmt.Sprintf("func '%s' arg0 type '%s', expect 'context.Context'", name, arg0.String()))
 	}
 
 	if !arg1.Implements(applicationEventType) {
-		return nil, xerrors.WrapContinue(
-			"func '%s' arg1 type '%s', expect implement ApplicationEvent", name, arg1.String())
+		return nil, xerrors.NewTyped(xerrors.Continue{}).
+			WithMessage(fmt.Sprintf("func '%s' arg1 type '%s', expect implement ApplicationEvent", name, arg1.String()))
 	}
 
 	if arg1 == applicationEventType && (name == onApplicationEventFuncName || name == onApplicationEventAsyncFuncName) {
-		return nil, xerrors.WrapContinue("func '%s' is object listener interface", name)
+		return nil, xerrors.NewTyped(xerrors.Continue{}).
+			WithMessage(fmt.Sprintf("func '%s' is object listener interface", name))
 	}
 
 	return &fnListenerInvoker{

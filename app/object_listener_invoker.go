@@ -21,6 +21,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -65,5 +66,6 @@ func NewObjectListenerInvoker(obj any, app Application) (ListenerInvoker, error)
 	if o.obj != nil || o.objAsync != nil {
 		return o, nil
 	}
-	return nil, xerrors.WrapContinue("type '%T' of object doesn't implement Listener", obj)
+	return nil, xerrors.NewTyped(xerrors.Continue{}).
+		WithMessage(fmt.Sprintf("type '%T' of object doesn't implement Listener", obj))
 }

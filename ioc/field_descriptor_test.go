@@ -123,7 +123,7 @@ func TestNewFieldDescriptor(t *testing.T) {
 			},
 			idx:    0,
 			expect: nil,
-			err:    "Invalid tag 'v'",
+			err:    "InvalidTagError: invalid tag 'v': must start with 'value:' or 'autowire:'",
 		},
 		{
 			desp: "wrong value field",
@@ -134,7 +134,7 @@ func TestNewFieldDescriptor(t *testing.T) {
 			},
 			idx:    0,
 			expect: nil,
-			err:    "Invalid value '1'",
+			err:    "InvalidTagError: invalid tag '1': must format as ${x.y}",
 		},
 		{
 			desp: "wrong bean field",
@@ -145,7 +145,7 @@ func TestNewFieldDescriptor(t *testing.T) {
 			},
 			idx:    0,
 			expect: nil,
-			err:    "Invalid autowire 'vv'",
+			err:    "InvalidTagError: invalid tag 'vv': it must be 'optional'",
 		},
 	}
 	for _, tc := range testCases {
@@ -155,7 +155,7 @@ func TestNewFieldDescriptor(t *testing.T) {
 
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).Should(MatchRegexp(tc.err))
+				g.Expect(err.Error()).Should(Equal(tc.err))
 				return
 			}
 
@@ -202,13 +202,13 @@ func TestNewBeanFieldDescriptor(t *testing.T) {
 			desp:   "empty content",
 			value:  "",
 			expect: nil,
-			err:    "Required autowire content",
+			err:    "InvalidTagError: invalid tag '': Required autowire content, it cann't be empty",
 		},
 		{
 			desp:   "non optional",
 			value:  "b1,required",
 			expect: nil,
-			err:    "Invalid autowire 'required'",
+			err:    "InvalidTagError: invalid tag 'required': it must be 'optional'",
 		},
 	}
 	for _, tc := range testCases {
@@ -218,7 +218,7 @@ func TestNewBeanFieldDescriptor(t *testing.T) {
 			fd, err := NewBeanFieldDescriptor(tc.value)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).Should(MatchRegexp(tc.err))
+				g.Expect(err.Error()).Should(Equal(tc.err))
 				return
 			}
 
@@ -257,13 +257,13 @@ func TestNewPropertyFieldDescriptor(t *testing.T) {
 			desp:   "format error",
 			value:  "b1",
 			expect: nil,
-			err:    "Invalid value 'b1'",
+			err:    "InvalidTagError: invalid tag 'b1': must format as ${x.y}",
 		},
 		{
 			desp:   "empty value",
 			value:  "${}",
 			expect: nil,
-			err:    "Required value content",
+			err:    "InvalidTagError: invalid tag '': Required value content, it cann't be empty",
 		},
 	}
 	for _, tc := range testCases {
@@ -273,7 +273,7 @@ func TestNewPropertyFieldDescriptor(t *testing.T) {
 			fd, err := NewPropertyFieldDescriptor(tc.value)
 			if tc.err != "" {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).Should(MatchRegexp(tc.err))
+				g.Expect(err.Error()).Should(Equal(tc.err))
 				return
 			}
 

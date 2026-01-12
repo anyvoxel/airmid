@@ -20,6 +20,8 @@
 package reader
 
 import (
+	"fmt"
+
 	"gopkg.in/yaml.v2"
 
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -37,6 +39,8 @@ func yamlRead(data []byte) (map[string]any, error) {
 func init() {
 	err := RegisterExtFileReader(yamlRead, ".yaml", ".yml")
 	if err != nil {
-		panic(xerrors.Wrapf(err, "Register yaml reader"))
+		panic(xerrors.NewTyped(xerrors.InitializationError{Reason: "Register yaml reader failed"}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Register yaml reader failed: %v", err)))
 	}
 }

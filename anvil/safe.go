@@ -21,6 +21,7 @@ package anvil
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"runtime/debug"
 
@@ -37,7 +38,8 @@ func SafeRun(ctx context.Context, cmd func(context.Context)) {
 			if ierr, ok := r.(error); ok {
 				err = ierr
 			} else {
-				err = xerrors.Errorf("Recover from: '%v', stack: '%v'", r, string(debug.Stack()))
+				err = xerrors.NewTyped(xerrors.PanicError{Recovered: r, Stack: string(debug.Stack())}).
+					WithMessage(fmt.Sprintf("Recovered from: '%v'", r))
 			}
 
 			slogctx.FromCtx(ctx).ErrorContext(

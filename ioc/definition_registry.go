@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -78,7 +79,8 @@ func (r *beanDefinitionRegistryImpl) RegisterBeanDefinition(
 	r.withLock(func() {
 		_, ok := r.beanDefinitionMap[beanName]
 		if ok {
-			err = xerrors.WrapDuplicate("Cannot register bean '%v': It is already registered", beanName)
+			err = xerrors.NewTyped(xerrors.Duplicate{ResourceType: "bean", ResourceID: beanName}).
+				WithMessage(fmt.Sprintf("Cannot register bean '%s': It is already registered", beanName))
 			return
 		}
 
@@ -92,7 +94,8 @@ func (r *beanDefinitionRegistryImpl) RemoveBeanDefinition(beanName string) (err 
 	r.withLock(func() {
 		_, ok := r.beanDefinitionMap[beanName]
 		if !ok {
-			err = xerrors.WrapNotFound("No bean '%v' registered", beanName)
+			err = xerrors.NewTyped(xerrors.NotFound{ResourceType: "bean", ResourceID: beanName}).
+				WithMessage(fmt.Sprintf("No bean '%s' registered", beanName))
 			return
 		}
 
@@ -108,7 +111,8 @@ func (r *beanDefinitionRegistryImpl) GetBeanDefinition(beanName string) (beanDef
 		beanDefinition, ok = r.beanDefinitionMap[beanName]
 		if !ok {
 			beanDefinition = nil
-			err = xerrors.WrapNotFound("No bean '%v' registered", beanName)
+			err = xerrors.NewTyped(xerrors.NotFound{ResourceType: "bean", ResourceID: beanName}).
+				WithMessage(fmt.Sprintf("No bean '%s' registered", beanName))
 			return
 		}
 	})

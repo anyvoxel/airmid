@@ -113,7 +113,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				bf.RegisterSingleton("b1", "b1")
 			},
 			expect: []any{},
-			err:    `property with key='p1' not found`,
+			err:    `NotFound: property with ID 'p1' not found`,
 		},
 		{
 			desp: "bean not found",
@@ -147,7 +147,7 @@ func TestFactoryResolverResolve(t *testing.T) {
 				bf.Set(context.Background(), "p1", "p1")
 			},
 			expect: []any{},
-			err:    "No bean 'b1' registered: ObjectNotFound",
+			err:    `^NotFound: No bean 'b1' registered$`,
 		},
 	}
 	for _, tc := range testCases {

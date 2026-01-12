@@ -20,6 +20,7 @@
 package ioc
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -106,7 +107,7 @@ func NewFieldDescriptor(field reflect.StructField, idx int) (*FieldDescriptor, e
 		}
 		fd.Bean = v
 	default:
-		return nil, xerrors.Errorf("Invalid tag '%v', it must start with 'value:' or 'autowire:'", tag)
+		return nil, xerrors.NewTyped(xerrors.InvalidTagError{Tag: tag, Reason: "must start with 'value:' or 'autowire:'"})
 	}
 
 	return fd, nil
@@ -120,12 +121,12 @@ var (
 func NewPropertyFieldDescriptor(value string) (*PropertyFieldDescriptor, error) {
 	res := valueRegex.FindAllStringSubmatch(value, -1)
 	if len(res) != 1 || len(res[0]) != 2 {
-		return nil, xerrors.Errorf("Invalid value '%v', it must format as ${x.y}", value)
+		return nil, xerrors.NewTyped(xerrors.InvalidTagError{Tag: value, Reason: "must format as ${x.y}"})
 	}
 
 	value = res[0][1]
 	if len(value) == 0 {
-		return nil, xerrors.Errorf("Required value content, it cann't be empty")
+		return nil, xerrors.NewTyped(xerrors.InvalidTagError{Reason: "Required value content, it cann't be empty"})
 	}
 
 	vv := strings.SplitN(value, ":=", 2)
@@ -141,7 +142,7 @@ func NewPropertyFieldDescriptor(value string) (*PropertyFieldDescriptor, error) 
 // NewBeanFieldDescriptor will return the descriptor from tag autowire.
 func NewBeanFieldDescriptor(value string) (*BeanFieldDescriptor, error) {
 	if len(value) == 0 {
-		return nil, xerrors.Errorf("Required autowire content, it cann't be empty")
+		return nil, xerrors.NewTyped(xerrors.InvalidTagError{Reason: "Required autowire content, it cann't be empty"})
 	}
 
 	vv := strings.SplitN(value, ",", 2)
@@ -150,7 +151,10 @@ func NewBeanFieldDescriptor(value string) (*BeanFieldDescriptor, error) {
 	}
 	if len(vv) > 1 {
 		if vv[1] != OptionalAutowireField {
-			return nil, xerrors.Errorf("Invalid autowire '%v', it must be '%v'", vv[1], OptionalAutowireField)
+			return nil, xerrors.NewTyped(xerrors.InvalidTagError{
+				Tag:    vv[1],
+				Reason: fmt.Sprintf("it must be '%v'", OptionalAutowireField),
+			})
 		}
 
 		fd.Optional = true
