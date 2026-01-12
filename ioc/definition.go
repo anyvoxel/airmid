@@ -81,7 +81,10 @@ func NewBeanDefinition(typ reflect.Type, opts ...BeanDefinitionOption) (BeanDefi
 	}
 
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
-		return nil, xerrors.Errorf("Cannot build bean definition from '%s', it must be *struct", typ.String())
+		return nil, xerrors.NewTyped(xerrors.InvalidBeanDefinitionError{
+			BeanName: typ.Name(),
+			Reason:   "type is not pointer to struct",
+		})
 	}
 
 	beanName := opt.name

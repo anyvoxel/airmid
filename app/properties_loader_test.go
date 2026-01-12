@@ -85,7 +85,7 @@ func TestEnvPropertiesLoader_LoadProperties(t *testing.T) {
 				_ = os.Unsetenv("AIRMID_EXCLUDE_ENV_PATTERNS")
 			},
 			isErr:  true,
-			errMsg: "property with key='test.env.exclude' not found: ObjectNotFound",
+			errMsg: "NotFound: property with ID 'test.env.exclude' not found",
 			expected: map[string]string{
 				"test.env.exclude": "test.env.exclude",
 			},

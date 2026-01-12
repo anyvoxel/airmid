@@ -41,7 +41,7 @@ func TestSafeRun(t *testing.T) {
 		{
 			desp: "panic on error",
 			cmd: func(context.Context) {
-				panic(xerrors.ErrNotFound)
+				panic(xerrors.NewTyped(xerrors.NotFound{}).WithMessage("not found panic"))
 			},
 		},
 		{

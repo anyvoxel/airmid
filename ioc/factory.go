@@ -117,9 +117,12 @@ func (f *beanFactoryImpl) getBeanLocked(ctx context.Context, name string) (any, 
 	switch beanDefinition.Scope() {
 	case ScopeSingleton, ScopePrototype:
 	default:
-		return nil, xerrors.Errorf(
-			"BeanDefinition %s has invalid scope '%v', it must be ['%v', '%v']",
-			beanDefinition.Name(), ScopeSingleton, ScopePrototype)
+		return nil, xerrors.NewTyped(
+			xerrors.InvalidScopeError{
+				ScopeName: fmt.Sprintf("'%v'", beanDefinition.Scope()),
+				Reason:    fmt.Sprintf("it must be ['%v', '%v']", ScopeSingleton, ScopePrototype),
+			},
+		)
 	}
 
 	v, err := beanDefinition.Constructor().NewObject(&factoryConstructorArgumentResolver{
@@ -133,7 +136,7 @@ func (f *beanFactoryImpl) getBeanLocked(ctx context.Context, name string) (any, 
 	if ok {
 		switch beanDefinition.Scope() {
 		case ScopePrototype:
-			return nil, xerrors.Errorf("cannot get bean '%s' circularly", name)
+			return nil, xerrors.NewTyped(xerrors.CircularDependency{BeanName: name})
 		case ScopeSingleton:
 			return cachedBean, nil
 		}
@@ -201,7 +204,7 @@ func (f *beanFactoryImpl) wireStruct(ctx context.Context, bean reflect.Value, fd
 	propertyValues := NewPropertyValues()
 	for _, fd := range fds {
 		fn := func(_ context.Context, _ FieldDescriptor, _ PropertyValues) error {
-			return xerrors.ErrNotImplement
+			return xerrors.NewTyped(xerrors.NotImplement{})
 		}
 
 		switch {
@@ -266,7 +269,8 @@ func (f *beanFactoryImpl) getNamedBeanValue(
 	ctx context.Context, fd FieldDescriptor, propertyValues PropertyValues) error {
 	obj, err := f.getBeanLocked(ctx, fd.Bean.Name)
 	if err != nil {
-		if xerrors.IsNotFound(err) && fd.Bean.Optional {
+		var notFoundErr *xerrors.TypedError[xerrors.NotFound]
+		if xerrors.As(err, &notFoundErr) && fd.Bean.Optional {
 			return nil
 		}
 		return err
@@ -301,21 +305,25 @@ func (f *beanFactoryImpl) getTypedBeanNoneSliceValue(
 	}
 
 	if len(primaryBeans) > 1 {
-		return xerrors.Errorf(
-			"'%v' primary candidates found for field '%v' with type %s",
-			len(primaryBeans), fd.Name, fd.Typ.String())
+		return xerrors.NewTyped(
+			xerrors.TooManyCandidatesError{Count: len(primaryBeans), Type: fd.Typ.String(), Field: fd.Name, IsPrimary: true},
+		)
 	}
 
 	if len(beans) == 0 {
 		if !fd.Bean.Optional {
 			// if no candidate beans and the field not optional, return error
-			return xerrors.Errorf("No candidate found for field '%v' with type %v", fd.Name, fd.Typ.String())
+			return xerrors.NewTyped(
+				xerrors.NoCandidateError{Type: fd.Typ.String(), Field: fd.Name},
+			)
 		}
 		return nil
 	}
 
 	if len(beans) > 1 {
-		return xerrors.Errorf("'%v' candidates found for field '%v' with type %s", len(beans), fd.Name, fd.Typ.String())
+		return xerrors.NewTyped(
+			xerrors.TooManyCandidatesError{Count: len(beans), Type: fd.Typ.String(), Field: fd.Name},
+		)
 	}
 
 	beanValue, err := f.getBeanLockedAsValue(ctx, beans[0])
@@ -399,9 +407,14 @@ func (f *beanFactoryImpl) ResolveBeanNames(_ context.Context, typ reflect.Type) 
 
 func (f *beanFactoryImpl) RegisterScope(name string, scope Scope) error {
 	if name == ScopeSingleton || name == ScopePrototype {
-		return xerrors.Errorf(
-			"Invalid scope name '%s', cannot replace existing scopes '%s' and '%s'",
-			name, ScopePrototype, ScopeSingleton)
+		return xerrors.NewTyped(xerrors.InvalidScopeError{
+			ScopeName: name,
+			Reason: fmt.Sprintf(
+				"cannot replace existing scopes '%s' and '%s'",
+				ScopePrototype,
+				ScopeSingleton,
+			),
+		})
 	}
 
 	pre, ok := f.scopes[name]
@@ -421,9 +434,12 @@ func (f *beanFactoryImpl) RegisterScope(name string, scope Scope) error {
 func (f *beanFactoryImpl) RegisterSingleton(name string, bean any) error {
 	oldObject, ok := f.singletonObjects[name]
 	if ok {
-		return xerrors.Errorf(
-			"Invalid object '%v' under bean name '%v', it already exists with object '%v'",
-			bean, name, oldObject.Interface())
+		return xerrors.NewTyped(
+			xerrors.InvalidBeanDefinitionError{
+				BeanName: name,
+				Reason:   fmt.Sprintf("object '%v' already exists with object '%v'", bean, oldObject.Interface()),
+			},
+		)
 	}
 
 	// TODO: add more validate for bean

@@ -20,6 +20,7 @@
 package reader
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -42,7 +43,8 @@ func (r *extReader) Match(filename string) error {
 		}
 	}
 
-	return xerrors.Errorf("'%v' cannot support filename '%v'", r.Name(), filename)
+	return xerrors.NewTyped(xerrors.UnsupportedTypeError{TargetType: filename}).
+		WithMessage(fmt.Sprintf("'%s' cannot support filename '%s'", r.Name(), filename))
 }
 
 func (r *extReader) Name() string {

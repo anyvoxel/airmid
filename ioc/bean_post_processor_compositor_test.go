@@ -21,12 +21,12 @@ package ioc
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	"github.com/anyvoxel/airmid/anvil"
-	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
 func TestNewBeanPostProcessorCompositor(t *testing.T) {
@@ -87,7 +87,7 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
 						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
-							return nil, xerrors.Errorf(tc.desp)
+							return nil, fmt.Errorf("%s", tc.desp)
 						},
 					},
 				)
@@ -121,9 +121,8 @@ func TestPostProcessBeforeInitialization(t *testing.T) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
 						BeforeInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
-							return nil, xerrors.Errorf(tc.desp)
-						},
-					},
+							return nil, fmt.Errorf("%s", tc.desp)
+						}},
 				)
 			},
 			obj:    anvil.Ptr(0),
@@ -195,7 +194,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
 						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
-							return nil, xerrors.Errorf(tc.desp)
+							return nil, fmt.Errorf("%s", tc.desp)
 						},
 					},
 				)
@@ -229,7 +228,7 @@ func TestPostProcessAfterInitialization(t *testing.T) {
 				tc.p.AddBeanPostProcessor(
 					&FuncBeanPostProcessor{
 						AfterInitializationFunc: func(_ context.Context, obj any, beanName string) (v any, err error) {
-							return nil, xerrors.Errorf(tc.desp)
+							return nil, fmt.Errorf("%s", tc.desp)
 						},
 					},
 				)

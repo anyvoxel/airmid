@@ -20,6 +20,8 @@
 package ioc
 
 import (
+	"fmt"
+
 	"github.com/anyvoxel/airmid/anvil"
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
@@ -73,7 +75,8 @@ func WithConstructorArguments(args []ConstructorArgument) BeanDefinitionOption {
 
 func (o *beanDefinitionOption) Validate() error {
 	if o.scope != ScopePrototype && o.scope != ScopeSingleton {
-		return xerrors.Errorf("Unsupport scope '%v'", o.scope)
+		return xerrors.NewTyped(xerrors.InvalidScopeError{ScopeName: o.scope}).
+			WithMessage(fmt.Sprintf("Unsupport scope '%v'", o.scope))
 	}
 
 	return nil

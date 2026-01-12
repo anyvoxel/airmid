@@ -21,6 +21,8 @@
 package reader
 
 import (
+	"fmt"
+
 	"github.com/anyvoxel/airmid/anvil/xerrors"
 )
 
@@ -44,8 +46,8 @@ var (
 func RegisterReader(r Reader) error {
 	for _, ri := range readers {
 		if ri == r {
-			return xerrors.WrapDuplicate(
-				"RegisterReader duplicate: reader '%v' is already exists with '%v'", r.Name(), ri.Name())
+			return xerrors.NewTyped(xerrors.Duplicate{ResourceType: "reader", ResourceID: r.Name()}).
+				WithMessage(fmt.Sprintf("RegisterReader duplicate: reader '%s' is already exists with '%s'", r.Name(), ri.Name()))
 		}
 	}
 
@@ -56,7 +58,8 @@ func RegisterReader(r Reader) error {
 // RegisterExtFileReader register the ext file reader to slice.
 func RegisterExtFileReader(fn func(data []byte) (map[string]any, error), exts ...string) error {
 	if len(exts) == 0 {
-		return xerrors.Errorf("RegisterExtFileReader: exts cannot be empty")
+		return xerrors.NewTyped(xerrors.InvalidArgument{Reason: "exts cannot be empty"}).
+			WithMessage("RegisterExtFileReader: exts cannot be empty")
 	}
 
 	return RegisterReader(&extReader{
@@ -75,5 +78,6 @@ func Read(filename string, data []byte) (map[string]any, error) {
 		return r.Read(data)
 	}
 
-	return nil, xerrors.Errorf("Cannot found reader for '%v'", filename)
+	return nil, xerrors.NewTyped(xerrors.NotFound{}).
+		WithMessage(fmt.Sprintf("Cannot found reader for '%s'", filename))
 }

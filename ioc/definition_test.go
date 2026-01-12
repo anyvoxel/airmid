@@ -173,21 +173,21 @@ func TestNewBeanDefinition(t *testing.T) {
 			typ:    reflect.TypeOf(int(0)),
 			opts:   nil,
 			expect: nil,
-			err:    "Cannot build bean definition from 'int'",
+			err:    "InvalidBeanDefinitionError: invalid bean definition for bean 'int': type is not pointer to struct",
 		},
 		{
 			desp:   "not ptr to struct",
 			typ:    reflect.TypeOf(testCase{}),
 			opts:   nil,
 			expect: nil,
-			err:    "Cannot build bean definition from 'ioc.testCase'",
+			err:    "InvalidBeanDefinitionError: invalid bean definition for bean 'testCase': type is not pointer to struct",
 		},
 		{
 			desp:   "empty airmid tag",
 			typ:    reflect.TypeOf((*testStruct1)(nil)),
 			opts:   nil,
 			expect: nil,
-			err:    "Invalid tag ''",
+			err:    "InvalidTagError: invalid tag '': must start with 'value:' or 'autowire:'",
 		},
 	}
 	for _, tc := range testCases {

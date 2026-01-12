@@ -20,6 +20,7 @@
 package parallel
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/anyvoxel/airmid/anvil"
@@ -45,7 +46,8 @@ func defaultOption() *parallelOption {
 // Complete will validate the option and correct it.
 func (o *parallelOption) Complete() error {
 	if o.count <= 0 {
-		return xerrors.Errorf("option.Complete: count '%d' must greater than zero", o.count)
+		return xerrors.NewTyped(xerrors.InvalidArgument{ArgumentName: "count", Reason: "must be greater than zero"}).
+			WithMessage(fmt.Sprintf("option.Complete: count '%d' must greater than zero", o.count))
 	}
 
 	if o.concurrent <= 0 {

@@ -21,6 +21,7 @@ package ioc
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/anyvoxel/airmid/anvil/xerrors"
@@ -68,7 +69,10 @@ func GetBean[T any](ctx context.Context, f BeanFactory, beanName string) (T, err
 
 	vv, ok := beanObject.(T)
 	if !ok {
-		return v, xerrors.Errorf("cannot convert %T to %T", beanObject, v)
+		return v, xerrors.NewTyped(xerrors.ConversionError{
+			SourceType: fmt.Sprintf("%T", beanObject),
+			TargetType: fmt.Sprintf("%T", v),
+		})
 	}
 
 	return vv, nil

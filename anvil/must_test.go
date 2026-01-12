@@ -36,8 +36,8 @@ func TestMust(t *testing.T) {
 	testCases := []testCase{
 		{
 			desp:   "panic with err",
-			err:    xerrors.ErrNotFound,
-			expect: xerrors.ErrNotFound,
+			err:    xerrors.NewTyped(xerrors.NotFound{}).WithMessage("some error"),
+			expect: xerrors.NewTyped(xerrors.NotFound{}).WithMessage("some error"),
 		},
 		{
 			desp:   "not panic",

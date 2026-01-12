@@ -22,6 +22,7 @@ package conv
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -34,7 +35,9 @@ func ConvertToBool(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseBool(origin)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type bool", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "bool", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type bool", origin))
 	}
 	return target, nil
 }
@@ -44,7 +47,9 @@ func ConvertToInt(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseInt(origin, 10, 0)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type int", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "int", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type int", origin))
 	}
 	return int(target), nil
 }
@@ -54,7 +59,9 @@ func ConvertToInt8(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseInt(origin, 10, 8)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type int8", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "int8", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type int8", origin))
 	}
 	return int8(target), nil
 }
@@ -64,7 +71,9 @@ func ConvertToInt16(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseInt(origin, 10, 16)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type int16", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "int16", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type int16", origin))
 	}
 	return int16(target), nil
 }
@@ -74,7 +83,9 @@ func ConvertToInt32(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseInt(origin, 10, 32)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type int32", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "int32", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type int32", origin))
 	}
 	return int32(target), nil
 }
@@ -84,7 +95,9 @@ func ConvertToInt64(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseInt(origin, 10, 64)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type int64", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "int64", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type int64", origin))
 	}
 	return target, nil
 }
@@ -94,7 +107,9 @@ func ConvertToUint(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseUint(origin, 10, 0)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type uint", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "uint", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type uint", origin))
 	}
 	return uint(target), nil
 }
@@ -104,7 +119,9 @@ func ConvertToUint8(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseUint(origin, 10, 8)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type uint8", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "uint8", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type uint8", origin))
 	}
 	return uint8(target), nil
 }
@@ -114,7 +131,9 @@ func ConvertToUint16(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseUint(origin, 10, 16)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type uint16", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "uint16", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type uint16", origin))
 	}
 	return uint16(target), nil
 }
@@ -124,7 +143,9 @@ func ConvertToUint32(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseUint(origin, 10, 32)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type uint32", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "uint32", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type uint32", origin))
 	}
 	return uint32(target), nil
 }
@@ -134,7 +155,9 @@ func ConvertToUint64(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseUint(origin, 10, 64)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type uint64", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "uint64", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type uint64", origin))
 	}
 	return target, nil
 }
@@ -144,7 +167,9 @@ func ConvertToFloat32(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseFloat(origin, 32)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type float32", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "float32", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type float32", origin))
 	}
 	return float32(target), nil
 }
@@ -154,7 +179,9 @@ func ConvertToFloat64(_ context.Context, data []string) (any, error) {
 	origin := data[0]
 	target, err := strconv.ParseFloat(origin, 64)
 	if err != nil {
-		return nil, xerrors.Wrapf(err, "Cann't convert %s to type float64", origin)
+		return nil, xerrors.NewTyped(xerrors.ConversionError{SourceType: "string", TargetType: "float64", Value: origin}).
+			WithCause(err).
+			WithMessage(fmt.Sprintf("Cann't convert %s to type float64", origin))
 	}
 	return target, nil
 }
@@ -221,7 +248,8 @@ func ConvertTo(ctx context.Context, typ reflect.Type, data []string) (any, error
 		return ConvertToString(ctx, data)
 	}
 
-	return nil, xerrors.Errorf("Unsupport target type %s", typ.String())
+	return nil, xerrors.NewTyped(xerrors.UnsupportedTypeError{TargetType: typ.String()}).
+		WithMessage(fmt.Sprintf("Unsupport target type %s", typ.String()))
 }
 
 // ToString convert i to string.
@@ -261,5 +289,6 @@ func ToString(i any) (string, error) {
 		return s.String(), nil
 	}
 
-	return "", xerrors.Errorf("Unsupport target type '%T'", i)
+	return "", xerrors.NewTyped(xerrors.UnsupportedTypeError{TargetType: fmt.Sprintf("'%T'", i)}).
+		WithMessage(fmt.Sprintf("Unsupport target type '%T'", i))
 }

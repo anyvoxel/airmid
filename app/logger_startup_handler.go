@@ -21,6 +21,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -96,7 +97,8 @@ func (*loggerStartupHandler) AfterLoadProps(ctx context.Context, app *airmidAppl
 	case "json":
 		slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, opt)))
 	default:
-		return xerrors.Errorf("unknown logger handler type %s", loggerC.handlerType)
+		return xerrors.NewTyped(xerrors.UnsupportedTypeError{TargetType: loggerC.handlerType}).
+			WithMessage(fmt.Sprintf("unknown logger handler type %s", loggerC.handlerType))
 	}
 	return nil
 }

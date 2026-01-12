@@ -144,7 +144,7 @@ func TestGetBean(t *testing.T) {
 
 		o, err := GetBean[*nonproxyNamer](context.Background(), bf, "1")
 		g.Expect(err).To(HaveOccurred())
-		g.Expect(err.Error()).To(MatchRegexp(`No bean '1' registered: ObjectNotFound`))
+		g.Expect(err.Error()).To(MatchRegexp(`^NotFound: No bean '1' registered$`))
 		g.Expect(o).To(BeNil())
 	})
 
@@ -155,7 +155,7 @@ func TestGetBean(t *testing.T) {
 
 		o, err := GetBean[*nonproxyNamer](context.Background(), bf, "1")
 		g.Expect(err).To(HaveOccurred())
-		g.Expect(err.Error()).To(MatchRegexp(`cannot convert \*ioc\.proxyNamer to \*ioc\.nonproxyNamer`))
+		g.Expect(err.Error()).To(MatchRegexp(`ConversionError: cannot convert from \*ioc.proxyNamer to \*ioc.nonproxyNamer`))
 		g.Expect(o).To(BeNil())
 	})
 

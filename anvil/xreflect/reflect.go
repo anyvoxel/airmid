@@ -64,7 +64,8 @@ func IndirectToSetableValue(i any) (reflect.Value, error) {
 	}
 
 	if !v.CanSet() {
-		return reflect.Value{}, xerrors.Errorf("The '%T' cannot been set, it must setable", i)
+		return reflect.Value{}, xerrors.NewTyped(xerrors.UnsetableError{TargetType: fmt.Sprintf("%T", i)}).
+			WithMessage(fmt.Sprintf("The '%T' cannot been set, it must setable", i))
 	}
 	return v, nil
 }

@@ -61,7 +61,8 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(
 		m := vv.Type().Method(i)
 		invoker, err := NewFnListenerInvoker(fn, m.Name, l.app)
 		if err != nil {
-			if xerrors.IsContinue(err) {
+			var continueErr *xerrors.TypedError[xerrors.Continue]
+			if xerrors.As(err, &continueErr) {
 				slogctx.FromCtx(ctx).DebugContext(
 					ctx,
 					"bean method doesn't implement the listener, skip it",
@@ -80,7 +81,8 @@ func (l *applicationListenerDetector) PostProcessAfterInitialization(
 
 	invoker, err := NewObjectListenerInvoker(obj, l.app)
 	if err != nil {
-		if !xerrors.IsContinue(err) {
+		var continueErr *xerrors.TypedError[xerrors.Continue]
+		if !xerrors.As(err, &continueErr) {
 			return nil, err
 		}
 
